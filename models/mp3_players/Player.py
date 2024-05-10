@@ -2,13 +2,16 @@ import time
 from models.timers.Timer import Timer
 import pygame
 from dataclasses import dataclass
+from models.audio_edit.AudioFile import AudioFile
+import io
 
 
 class Player:
     timer: Timer  # Timer object to keep track of the time of the sound file
-    play_obj: pygame.mixer.Sound | None   # Play object which represents the sound file
-    channel: pygame.mixer.Channel | None   # Channel , which is used to play the sound file
-    is_playing: bool   # Flag to check if the sound file is playing
+    play_obj: pygame.mixer.Sound | None  # Play object which represents the sound file
+    channel: pygame.mixer.Channel | None  # Channel , which is used to play the sound file
+    is_playing: bool  # Flag to check if the sound file is playing
+    audio_segment: AudioFile | None  # Pydub audio segment for in-memory editing
 
     def __init__(self):
         pygame.mixer.init()
@@ -16,15 +19,17 @@ class Player:
         self.channel = None
         self.is_playing = False
         self.timer = Timer()
+        self.audio_segment = None
 
     def is_loaded(self):
         """Check if a sound file is loaded."""
         return self.play_obj is not None
 
-    def load(self, file_path):
-        """Load a sound file."""
+    def load(self, file_path: str):
+        """Load a sound file from the given file path."""
         self.stop()
-        self.play_obj = pygame.mixer.Sound(file_path)
+        self.audio_segment = AudioFile.from_file(file_path)
+        self.play_obj = pygame.mixer.Sound(self.audio_segment.to_buffer())
 
     def play(self):
         """Play the loaded sound file."""
