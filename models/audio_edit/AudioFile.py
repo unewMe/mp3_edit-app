@@ -1,35 +1,17 @@
 from pydub import AudioSegment
 import math
 import io
+from models.audio_edit.filters import FilterType
 
 
 class AudioFile(AudioSegment):
 
-    def to_buffer(self, format: str = "wav"):
+    def to_buffer(self, format: str = "mp3"):
         """Exports the audio file to a buffer."""
         buffer = io.BytesIO()
         self.export(buffer, format=format)
         buffer.seek(0)
         return buffer
-
-    def set_volume(self, percent: float):
-        """Sets the volume of the audio file to the given percentage"""
-        if percent == 0:
-            # For 0% volume, we set the volume to negative infinity in dB
-            new_volume = -math.inf
-        else:
-            # Logarithmic scale for volume
-            new_volume = 20 * math.log10(percent / 100)
-
-        # Calculates the volume change in dB
-        volume_change = new_volume - self.dBFS
-
-        # Returns a new AudioFile with the volume changed
-        return self._spawn(self.get_array_of_samples(), overrides={
-            "frame_rate": self.frame_rate,
-            "sample_width": self.sample_width,
-            "channels": self.channels
-        }).apply_gain(volume_change)
 
     def replace_with_audio(self, new_audio: bytes | AudioSegment):
         """
@@ -49,3 +31,9 @@ class AudioFile(AudioSegment):
             "sample_width": new_segment.sample_width,
             "channels": new_segment.channels
         })
+
+    def apply_filter(self, filter_type: FilterType):
+        """Applies the given filter to the audio file."""
+        filter_instance = filter_type.value(self)
+        return filter_instance.apply()
+
