@@ -7,7 +7,9 @@ from models.audio_edit.filters import FilterType
 class AudioFile(AudioSegment):
 
     def to_buffer(self, format: str = "mp3"):
-        """Exports the audio file to a buffer."""
+        """
+        Exports the audio file to a buffer.
+        """
         buffer = io.BytesIO()
         self.export(buffer, format=format)
         buffer.seek(0)
@@ -33,7 +35,9 @@ class AudioFile(AudioSegment):
         })
 
     def apply_filter(self, filter_type: FilterType):
-        """Applies the given filter to the audio file."""
+        """
+        Applies the given filter to the audio file.
+        """
         filter_instance = filter_type.value(self)
         return filter_instance.apply()
 

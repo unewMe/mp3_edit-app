@@ -2,6 +2,7 @@ import sys
 from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QFileDialog
 from PySide6.QtCore import QTimer
 from models.mp3_players.Player import Player
+from models.audio_io.io import read_audio_file
 
 
 """TESTING THE GUI"""
@@ -45,7 +46,7 @@ class MusicPlayerGUI(QWidget):
     def load_music(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Open Music File", "", "MP3 Files (*.mp3)")
         if file_path:
-            self.player.load(file_path)
+            self.player.load(read_audio_file(file_path))
 
     def start_playback(self):
         self.player.play()

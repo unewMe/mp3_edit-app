@@ -5,11 +5,9 @@ from scipy.signal import spectrogram
 
 
 class AudioVisualizer:
-    def __init__(self, audio_file):
+    def __init__(self, audio_file: AudioFile):
         """
-        Konstruktor klasy AudioVisualizer.
-
-        :param audio_file: Instancja klasy AudioFile.
+        AudioFile constructor.
         """
         self.audio_file = audio_file
         self.samples = np.array(self.audio_file.get_array_of_samples())
@@ -17,7 +15,7 @@ class AudioVisualizer:
 
     def plot_waveform(self):
         """
-        Wizualizuje amplitudę dźwięku w czasie.
+        Visualizes the waveform of the sound file.
         """
         plt.figure(figsize=(10, 4))
         plt.plot(self.samples)
@@ -29,7 +27,7 @@ class AudioVisualizer:
 
     def plot_spectrogram(self):
         """
-        Wizualizuje spektrogram dźwięku.
+        Visualizes the intensity of the sound at different frequencies over time.
         """
         f, t, Sxx = spectrogram(self.samples, self.frame_rate)
         plt.figure(figsize=(10, 4))
@@ -41,9 +39,3 @@ class AudioVisualizer:
         plt.show()
 
 
-# Przykład użycia:
-audio_path = 'Beethoven.mp3'
-audio_file = AudioFile.from_file(audio_path)
-visualizer = AudioVisualizer(audio_file)
-visualizer.plot_waveform()
-visualizer.plot_spectrogram()

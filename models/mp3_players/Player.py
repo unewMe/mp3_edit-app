@@ -20,38 +20,50 @@ class Player:
         self.audio_segment = None
 
     def is_loaded(self):
-        """Check if a sound file is loaded."""
+        """
+        Check if a sound file is loaded.
+        """
         return self.play_obj is not None
 
-    def load(self, file_path: str):
-        """Load a sound file from the given file path."""
+    def load(self, audio_file: AudioFile):
+        """
+        Load a sound file from the given file path.
+        """
         self.stop()
-        self.audio_segment = AudioFile.from_file(file_path)
+        self.audio_segment = audio_file
         self.play_obj = pygame.mixer.Sound(self.audio_segment.to_buffer())
 
     def play(self):
-        """Play the loaded sound file."""
+        """
+        Play the loaded sound file.
+        """
         if self.is_loaded():
             self.channel = self.play_obj.play()
             self.is_playing = True
             self.timer.start()
 
     def pause(self):
-        """Pause the sound file."""
+        """
+        Pause the sound file.
+        """
         if self.is_loaded() and self.is_playing:
             self.channel.pause()
             self.is_playing = False
             self.timer.pause()
 
     def resume(self):
-        """Resume the sound file."""
+        """
+        Resume the sound file.
+        """
         if self.is_loaded() and not self.is_playing:
             self.channel.unpause()
             self.is_playing = True
             self.timer.resume()
 
     def stop(self):
-        """Stop the sound file."""
+        """
+        Stop the sound file.
+        """
         if self.is_loaded():
             self.channel.stop()
             self.is_playing = False
@@ -59,16 +71,22 @@ class Player:
 
 
     def set_volume(self, volume: float):
-        """Set the volume of the sound file."""
+        """
+        Set the volume of the sound file.
+        """
         if self.is_loaded():
             self.channel.set_volume(volume)
 
     def get_current_time(self):
-        """Get the current time of the sound file."""
+        """
+        Get the current time of the sound file.
+        """
         return self.timer.get_time()
 
     def wait_for_finish(self):
-        """Wait for the sound file to finish playing."""
+        """
+        Wait for the sound file to finish playing.
+        """
         if self.is_loaded() and self.is_playing:
             while self.channel.get_busy():
                 pygame.time.delay(100)
