@@ -1,9 +1,7 @@
 import time
 from models.timers.Timer import Timer
 import pygame
-from dataclasses import dataclass
 from models.audio_edit.AudioFile import AudioFile
-import io
 
 
 class Player:
@@ -58,6 +56,12 @@ class Player:
             self.channel.stop()
             self.is_playing = False
             self.timer.restart()
+
+
+    def set_volume(self, volume: float):
+        """Set the volume of the sound file."""
+        if self.is_loaded():
+            self.channel.set_volume(volume)
 
     def get_current_time(self):
         """Get the current time of the sound file."""
