@@ -44,6 +44,12 @@ class AudioFile(AudioSegment):
             "channels": new_segment.channels
         })
 
+    def set_volume(self, volume: float):
+        """
+        Sets the volume of the audio file.
+        """
+        return self.apply_gain(math.log10(volume) * 10)
+
     def apply_filter(self, filter_type: FilterType):
         """
         Applies the given filter to the audio file.
