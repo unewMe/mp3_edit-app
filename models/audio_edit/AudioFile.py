@@ -5,6 +5,16 @@ from models.audio_edit.filters import FilterType
 
 
 class AudioFile(AudioSegment):
+    delay: int
+
+    def __init__(self, data=None, *args, **kwargs):
+        super().__init__(data, *args, **kwargs)
+        self.delay = 0
+
+    @classmethod
+    def from_segment(cls, segment: AudioSegment):
+        return cls(segment._data, frame_rate=segment.frame_rate, sample_width=segment.sample_width,
+                   channels=segment.channels)
 
     def to_buffer(self, format: str = "mp3"):
         """
@@ -40,4 +50,3 @@ class AudioFile(AudioSegment):
         """
         filter_instance = filter_type.value(self)
         return filter_instance.apply()
-
