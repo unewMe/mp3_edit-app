@@ -3,6 +3,7 @@ from pydub import AudioSegment
 
 import pygame
 from models.audio_edit.AudioFile import AudioFile
+from models.audio_edit.filters import FilterType
 
 class AudioQueuePlayer:
     sound_files: dict[str, AudioFile]  # Dictionary mapping sound_id to AudioFile
@@ -79,3 +80,29 @@ class AudioQueuePlayer:
         self.is_playing = False
         self.paused = False
         self.play_order.clear()
+
+    def set_play_order(self, play_order: list[str]):
+        """
+        Set the order in which the sounds should be played.
+        """
+        self.play_order = play_order
+
+    def apply_filter(self, sound_id: str, filter_type: FilterType):
+        """
+        Apply a filter to the audio file corresponding to the given sound_id.
+        """
+        if sound_id in self.sound_files:
+            self.sound_files[sound_id].apply_filter(filter_type)
+
+    def set_volume_on_sound(self, sound_id: str, volume: float):
+        """
+        Set the volume of the audio file corresponding to the given sound_id.
+        """
+        if sound_id in self.sound_files:
+            self.sound_files[sound_id].set_volume(volume)
+    def set_volume(self, volume: float):
+        """
+        Set the volume of the playback.
+        """
+        if self.channel:
+            self.channel.set_volume(volume)
