@@ -10,7 +10,6 @@ class AudioQueuePlayer:
     final_audio: AudioFile | None  # Combined audio file to be played
     channel: pygame.mixer.Channel | None  # Channel used to play the sound file
     is_playing: bool  # Flag to check if the sound file is playing
-    current_index: int  # Current index in the play_order
     paused: bool  # Flag to check if playback is paused
 
     def __init__(self):
@@ -20,7 +19,6 @@ class AudioQueuePlayer:
         self.final_audio = None
         self.channel = None
         self.is_playing = False
-        self.current_index = 0
         self.paused = False
 
     def load(self, sound_id: str, audio_file: AudioFile, delay: int = 0):
@@ -78,8 +76,6 @@ class AudioQueuePlayer:
         """
         if self.channel:
             self.channel.stop()
-        self.final_audio = None
         self.is_playing = False
         self.paused = False
-        self.current_index = 0
         self.play_order.clear()
