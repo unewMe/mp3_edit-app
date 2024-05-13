@@ -4,6 +4,8 @@ import numpy as np
 from scipy.signal import butter, lfilter
 import abc
 
+from models.audio_edit.AudioFile import AudioFile
+
 
 class FilterType(Enum):
     """
@@ -17,13 +19,13 @@ class BaseFilter(metaclass=abc.ABCMeta):
     """
     Abstract base class for audio filters.
     """
-    def __init__(self, audio: AudioSegment):
+    def __init__(self, audio: AudioFile):
         self.audio = audio
         self.samples = np.array(audio.get_array_of_samples())
         self.fs = audio.frame_rate
 
     @abc.abstractmethod
-    def apply(self):
+    def apply(self) -> AudioFile:
         """
         Applies the filter to the audio.
         """
@@ -31,12 +33,12 @@ class BaseFilter(metaclass=abc.ABCMeta):
 
 
 class LowPassFilter(BaseFilter):
-    def __init__(self, audio: AudioSegment, cutoff: int = 5000, order: int = 5):
+    def __init__(self, audio: AudioFile, cutoff: int = 5000, order: int = 5):
         super().__init__(audio)
         self.cutoff = cutoff
         self.order = order
 
-    def apply(self):
+    def apply(self) -> AudioFile:
         """
         Apply the low pass filter to the audio.
         """
@@ -44,16 +46,16 @@ class LowPassFilter(BaseFilter):
         normal_cutoff = self.cutoff / nyq
         b, a = butter(self.order, normal_cutoff, btype='low', analog=False)
         filtered_samples = lfilter(b, a, self.samples)
-        return self.audio._spawn(filtered_samples)
+        return AudioFile.from_file(self.audio._spawn(filtered_samples))
 
 
 class HighPassFilter(BaseFilter):
-    def __init__(self, audio: AudioSegment, cutoff: int = 200, order: int = 5):
+    def __init__(self, audio: AudioFile, cutoff: int = 200, order: int = 5):
         super().__init__(audio)
         self.cutoff = cutoff
         self.order = order
 
-    def apply(self):
+    def apply(self) -> AudioFile:
         """
         Apply the high pass filter to the audio.
         """
@@ -62,4 +64,4 @@ class HighPassFilter(BaseFilter):
         normal_cutoff = self.cutoff / nyq
         b, a = butter(self.order, normal_cutoff, btype='high', analog=False)
         filtered_samples = lfilter(b, a, self.samples)
-        return self.audio._spawn(filtered_samples)
+        return AudioFile.from_file(self.audio._spawn(filtered_samples))
