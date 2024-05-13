@@ -10,6 +10,6 @@ def read_audio_file(file_path: str) -> AudioFile:
 
 def write_audio_file(audio_file: AudioFile, file_path: str, file_format: str = "mp3") -> None:
     """
-    Write an audio file to the given file path.
+    Write an audio file to the given file path and type.
     """
     audio_file.export(file_path, format=file_format)
