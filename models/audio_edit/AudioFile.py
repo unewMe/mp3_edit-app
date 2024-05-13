@@ -16,6 +16,10 @@ class AudioFile(AudioSegment):
         return cls(segment._data, frame_rate=segment.frame_rate, sample_width=segment.sample_width,
                    channels=segment.channels)
 
+    @classmethod
+    def from_file(cls, file_path: str):
+        return cls.from_segment(AudioSegment.from_file(file_path))
+
     def to_buffer(self, format: str = "mp3"):
         """
         Exports the audio file to a buffer.
