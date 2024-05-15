@@ -1,7 +1,7 @@
 import sys
 from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QFileDialog
 from PySide6.QtCore import QTimer
-from models.mp3_players.Player import Player
+from models.mp3_players.AudioQueuePlayer import AudioQueuePlayer
 from models.audio_io.io import read_audio_file
 
 
@@ -11,7 +11,7 @@ class MusicPlayerGUI(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.player = Player()
+        self.player = AudioQueuePlayer()
         self.init_ui()
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_timer)
