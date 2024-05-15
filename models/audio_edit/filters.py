@@ -4,8 +4,6 @@ import numpy as np
 from scipy.signal import butter, lfilter
 import abc
 
-from models.audio_edit.AudioFile import AudioFile
-
 
 class FilterType(Enum):
     """
@@ -19,13 +17,13 @@ class BaseFilter(metaclass=abc.ABCMeta):
     """
     Abstract base class for audio filters.
     """
-    def __init__(self, audio: AudioFile):
+    def __init__(self, audio):
         self.audio = audio
         self.samples = np.array(audio.get_array_of_samples())
         self.fs = audio.frame_rate
 
     @abc.abstractmethod
-    def apply(self) -> AudioFile:
+    def apply(self):
         """
         Applies the filter to the audio.
         """
@@ -33,15 +31,16 @@ class BaseFilter(metaclass=abc.ABCMeta):
 
 
 class LowPassFilter(BaseFilter):
-    def __init__(self, audio: AudioFile, cutoff: int = 5000, order: int = 5):
+    def __init__(self, audio, cutoff: int = 5000, order: int = 5):
         super().__init__(audio)
         self.cutoff = cutoff
         self.order = order
 
-    def apply(self) -> AudioFile:
+    def apply(self):
         """
         Apply the low pass filter to the audio.
         """
+        from models.audio_edit.AudioFile import AudioFile
         nyq = 0.5 * self.fs
         normal_cutoff = self.cutoff / nyq
         b, a = butter(self.order, normal_cutoff, btype='low', analog=False)
@@ -50,15 +49,16 @@ class LowPassFilter(BaseFilter):
 
 
 class HighPassFilter(BaseFilter):
-    def __init__(self, audio: AudioFile, cutoff: int = 200, order: int = 5):
+    def __init__(self, audio, cutoff: int = 200, order: int = 5):
         super().__init__(audio)
         self.cutoff = cutoff
         self.order = order
 
-    def apply(self) -> AudioFile:
+    def apply(self):
         """
         Apply the high pass filter to the audio.
         """
+        from models.audio_edit.AudioFile import AudioFile
 
         nyq = 0.5 * self.fs
         normal_cutoff = self.cutoff / nyq
