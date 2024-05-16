@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QMainWindow, QWidget, QTabWidget, QVBoxLayout, QHBoxLayout
+from PySide6.QtWidgets import QMainWindow, QWidget, QTabWidget, QVBoxLayout, QHBoxLayout, QPushButton, QListWidget
 from PySide6.QtCore import Qt
 
 class HomeView(QMainWindow):
@@ -32,5 +32,22 @@ class HomeView(QMainWindow):
         main_layout.addLayout(top_layout)
         main_layout.addStretch(1)
 
-
         self.tabs.setFixedSize(800, 600)
+
+        files_layout = QVBoxLayout(self.files_tab)
+        files_buttons_layout = QHBoxLayout()
+
+        add_button = QPushButton("Add")
+        delete_button = QPushButton("Remove")
+        add_button.setFixedSize(80, 25)
+        delete_button.setFixedSize(80, 25)
+        files_buttons_layout.addWidget(add_button)
+        files_buttons_layout.addWidget(delete_button)
+        files_buttons_layout.addStretch(1)
+
+
+        files_layout.addLayout(files_buttons_layout)
+
+        self.files_list = QListWidget()
+        self.files_list.setFixedSize(780, 540)
+        files_layout.addWidget(self.files_list)
