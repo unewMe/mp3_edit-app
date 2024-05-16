@@ -23,8 +23,11 @@ def player_test():
 
 def single_player_test():
     player = AudioQueuePlayer()
-    player.load("sound1", read_audio_file("10.mp3"))
-    player.load("sound2", read_audio_file("10.mp3"), delay=5)
+    x = read_audio_file("10.mp3")
+    from models.audio_edit.filters import LowPassFilter,HighPassFilter
+    filter_ = HighPassFilter(x)
+    x = filter_.apply()
+    player.load("sound1", x)
     player.combine_audio_files()
     player.play()
     time.sleep(50)
