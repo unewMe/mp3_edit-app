@@ -5,7 +5,11 @@ from models.audio_edit.filters import FilterType
 
 
 class AudioFile(AudioSegment):
-    delay: int
+    """
+    Class to represent an audio file.
+    """
+
+    delay: int  # Delay in seconds before playing the audio file
 
     def __init__(self, data=None, *args, **kwargs):
         super().__init__(data, *args, **kwargs)

@@ -6,6 +6,10 @@ from models.audio_edit.AudioFile import AudioFile
 from models.audio_edit.filters import FilterType
 
 class AudioQueuePlayer:
+    """
+    Class to play a queue of audio files in sequence.
+    """
+
     sound_files: dict[str, AudioFile]  # Dictionary mapping sound_id to AudioFile
     play_order: list[str]  # List of sound_ids in the order they should be played
     final_audio: AudioFile | None  # Combined audio file to be played

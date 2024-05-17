@@ -5,6 +5,12 @@ from scipy.signal import spectrogram
 
 
 class AudioVisualizer:
+    """
+    Class to visualize audio files.
+    """
+
+    audio_file: AudioFile # Audio file to visualize
+
     def __init__(self, audio_file: AudioFile):
         """
         AudioFile constructor.
@@ -37,5 +43,4 @@ class AudioVisualizer:
         plt.title('Spectrogram')
         plt.colorbar(label='Intensity [dB]')
         plt.show()
-
 

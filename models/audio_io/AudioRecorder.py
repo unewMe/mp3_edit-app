@@ -1,13 +1,21 @@
 import pyaudio
-import wave
 from pydub import AudioSegment
-import io
+
 
 class AudioRecorder:
     """
     Class to record audio from the microphone.
     """
-    def __init__(self, format=pyaudio.paInt16, channels=1, rate=44100, chunk=1024):
+
+    format: int  # Format of the audio
+    channels: int  # Number of audio channels
+    rate: int  # Sampling rate
+    chunk: int  # Chunk size
+    frames: list[bytes]  # List of recorded audio frames
+    stream: pyaudio.Stream | None  # Audio stream
+    audio: pyaudio.PyAudio  # PyAudio instance
+
+    def __init__(self, format: int = pyaudio.paInt16, channels: int = 1, rate: int = 44100, chunk: int = 1024):
         self.format = format
         self.channels = channels
         self.rate = rate
@@ -35,7 +43,7 @@ class AudioRecorder:
         self.stream.close()
         print("Recording stopped.")
 
-    def convert_to_audiosegment(self):
+    def convert_to_audiosegment(self) -> AudioSegment:
         """
         Convert the recorded frames to a pydub AudioSegment directly from raw data.
         """
@@ -50,7 +58,7 @@ class AudioRecorder:
         )
         return audio_segment
 
-    def record_callback(self, in_data, frame_count, time_info, status):
+    def record_callback(self, in_data, frame_count, time_info, status) -> tuple[bytes, int]:
         """
         Callback function to collect frames from the audio stream.
         """

@@ -4,7 +4,9 @@ from dataclasses import dataclass
 
 @dataclass
 class Timer:
-
+    """
+    Class to measure time elapsed.
+    """
     start_time: float | None = None  # time when timer started
     elapsed_time: float = 0  # time elapsed since timer started
     is_running: bool = False  # flag to check if timer is running

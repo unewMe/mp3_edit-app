@@ -1,19 +1,23 @@
+from dataclasses import dataclass
+
 from pytube import YouTube, request
 import re
 
-import re
-from pytube import YouTube
-from pytube import request
-
-
+@dataclass
 class YouTubeDownloader:
-    def __init__(self):
-        self.is_paused = False
-        self.is_cancelled = False
-        self.filesize = 0
-        self.downloaded = 0
+    """
+    Class to download audio from YouTube
+    """
+    is_paused: bool = False
+    is_cancelled: bool = False
+    downloaded: int = 0
+    filesize: int = 0
 
     def download_audio(self, url, filelocation):
+        """
+        Download audio from YouTube to mp3
+        """
+
         try:
             print('Connecting ...')
             yt = YouTube(url)

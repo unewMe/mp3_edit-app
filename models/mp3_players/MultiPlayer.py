@@ -1,6 +1,12 @@
 from models.mp3_players.Player import Player
 
 class MultiPlayer:
+    """
+    Class to manage multiple audio players.
+    """
+
+    players: list[Player] # List of Player objects
+
     def __init__(self, players_num=3):
         self.players = [Player() for _ in range(players_num)]
 
