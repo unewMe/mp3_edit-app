@@ -48,5 +48,3 @@ class YouTubeDownloader:
         except Exception as e:
             print(e)
 
-downloader = YouTubeDownloader()
-downloader.download_audio('https://www.youtube.com/watch?v=SDFdzLJBH7g', './')
