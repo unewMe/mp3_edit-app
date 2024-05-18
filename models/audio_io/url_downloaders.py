@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from pytube import YouTube, request
+from pytube import exceptions as exp
 import re
 
 @dataclass
@@ -45,6 +46,14 @@ class YouTubeDownloader:
                         print('Audio Download completed!')
                         break
             print('done')
+        except exp.VideoUnavailable:
+            raise exp.VideoUnavailable("Video is unavailable.")
+        except ConnectionError:
+            raise ConnectionError("Network connection error.")
+        except TimeoutError:
+            raise TimeoutError("Request timed out.")
+        except IOError:
+            raise IOError("File operation error.")
         except Exception as e:
-            print(e)
+            raise Exception(f"An unexpected error occurred: {str(e)}")
 
