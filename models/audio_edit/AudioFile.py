@@ -24,6 +24,13 @@ class AudioFile(AudioSegment):
     def from_file(cls, file_path: str):
         return cls.from_segment(AudioSegment.from_file(file_path))
 
+    def _spawn(self, data: bytes, overrides={}):
+        """
+        Spawns a new AudioFile object with the given data and overrides.
+        """
+        return self.from_segment(AudioSegment(data, frame_rate=self.frame_rate, sample_width=self.sample_width,
+                                              channels=self.channels))
+
     def to_buffer(self, format: str = "mp3"):
         """
         Exports the audio file to a buffer.
@@ -64,3 +71,5 @@ class AudioFile(AudioSegment):
         """
         filter_instance = filter_type.value(self)
         return filter_instance.apply()
+
+
