@@ -28,8 +28,7 @@ class AudioFile(AudioSegment):
         """
         Spawns a new AudioFile object with the given data and overrides.
         """
-        return self.from_segment(AudioSegment(data, frame_rate=self.frame_rate, sample_width=self.sample_width,
-                                              channels=self.channels))
+        return self.__class__(data, frame_rate=self.frame_rate, sample_width=self.sample_width, channels=self.channels)
 
     def to_buffer(self, format: str = "mp3"):
         """
@@ -68,6 +67,7 @@ class AudioFile(AudioSegment):
     def apply_filter(self, filter_type: FilterType):
         """
         Applies the given filter to the audio file.
+        :return: AudioFile
         """
         filter_instance = filter_type.value(self)
         return filter_instance.apply()
