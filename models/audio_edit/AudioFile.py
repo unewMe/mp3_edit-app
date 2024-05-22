@@ -2,6 +2,7 @@ from pydub import AudioSegment
 import math
 import io
 from models.audio_edit.filters import FilterType
+from models.audio_edit.equalizer import Equalizer, BaseBand
 
 
 class AudioFile(AudioSegment):
@@ -10,10 +11,15 @@ class AudioFile(AudioSegment):
     """
 
     delay: int  # Delay in seconds before playing the audio file
+    bands: list[BaseBand]  # List of equalizer bands to apply to the audio file
 
-    def __init__(self, data=None, *args, **kwargs):
+    def __init__(self, data=None, bands: list[BaseBand] = [], *args, **kwargs):
         super().__init__(data, *args, **kwargs)
         self.delay = 0
+        self.bands = bands
+        if bands:
+            for band in self.bands:
+                band.segment = self
 
     @classmethod
     def from_segment(cls, segment: AudioSegment):
@@ -28,7 +34,8 @@ class AudioFile(AudioSegment):
         """
         Spawns a new AudioFile object with the given data and overrides.
         """
-        return self.__class__(data, frame_rate=self.frame_rate, sample_width=self.sample_width, channels=self.channels)
+        return self.__class__(data, bands=self.bands, frame_rate=self.frame_rate, sample_width=self.sample_width,
+                              channels=self.channels)
 
     def to_buffer(self, format: str = "mp3"):
         """
@@ -71,5 +78,3 @@ class AudioFile(AudioSegment):
         """
         filter_instance = filter_type.value(self)
         return filter_instance.apply()
-
-
