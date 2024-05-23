@@ -13,6 +13,7 @@ class HomeCore:
         self.player_id = 1
 
     def add_file(self, file_path) -> None:
+        """Adds an audio file to the file list. If the file already exists, a copy is created."""
         file_name = file_path.split("/")[-1]
         audio_file = read_audio_file(file_path)
         if file_name not in self.files:
@@ -22,11 +23,13 @@ class HomeCore:
             self.files[copy] = audio_file
 
     def create_player(self) -> None:
+        """Creates a new player and adds it to the player list."""
         player = AudioQueuePlayer()
         self.players[f"Player{self.player_id}"] = player
         self.player_id += 1
 
-    def remove_file(self, file_name):
+    def remove_file(self, file_name) -> None:
+        """Removes the selected file from the file list."""
         self.files.pop(file_name)
 
 
