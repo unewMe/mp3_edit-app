@@ -3,7 +3,7 @@ from PySide6.QtCore import (QCoreApplication,
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (QComboBox, QFrame,
                                QLabel, QLineEdit, QListView, QPushButton,
-                               QSlider, QTabWidget, QWidget, QMainWindow, QListWidget)
+                               QSlider, QTabWidget, QWidget, QMainWindow, QListWidget, QMenuBar)
 
 
 class HomeView(QMainWindow):
@@ -20,8 +20,11 @@ class HomeView(QMainWindow):
         dialog.setFixedSize(1920, 1080)
         dialog.setWindowTitle("Audio editor")
 
+        self.menuBar().addMenu("File")
+        self.menuBar().setGeometry(QRect(0, 0, 1920, 10))
+
         self.tab_view = QTabWidget(dialog)
-        self.tab_view.setGeometry(QRect(10, 20, 701, 501))
+        self.tab_view.setGeometry(QRect(10, 40, 701, 481))
 
         self.files = QWidget()
         self.files.setObjectName(u"files")
@@ -367,6 +370,8 @@ class HomeView(QMainWindow):
         self.khz8_slider.raise_()
         self.khz16_slider.raise_()
 
+
+
         self.add_to_player_button = QPushButton(self.player_editing_frame)
         self.add_to_player_button.setGeometry(QRect(318, 80, 75, 24))
         self.add_to_player_button.setText("Add")
@@ -396,6 +401,9 @@ class HomeView(QMainWindow):
         self.choose_player_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.choose_player_label.setText("Choose Player")
 
+        self.choose_audio_label.raise_()
+        self.choose_player_label.raise_()
+
 
     def update_file_list(self, files):
         """Updates read files list"""
@@ -406,6 +414,16 @@ class HomeView(QMainWindow):
         """Updates created players list"""
         self.created_players_list.clear()
         self.created_players_list.addItems(players)
+
+    def update_player_info(self):
+        """Updates player info"""
+        if self.created_players_list.selectedItems():
+            player_name = self.created_players_list.currentItem().text()
+            self.editing_player_label.setText(f"Player: {player_name}")
+            self.choose_player_label.hide()
+        else:
+            self.editing_player_label.setText("Player:")
+            self.choose_player_label.show()
 
 
 
