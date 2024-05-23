@@ -15,7 +15,8 @@ class HomeController:
         self.view.create_player_button.clicked.connect(self.create_player)
 
 
-    def add_file(self):
+    def add_file(self) -> None:
+        """Opens a file dialog to select an audio file and adds it to the file list."""
         file_path, _ = QFileDialog.getOpenFileName(self.view, "Open Audio File", "", "Audio Files (*.mp3);;All Files (*)")
         if file_path:
             pop_up = PopUpMsg("Pending", "Rendering audio file, please wait...")
@@ -25,16 +26,19 @@ class HomeController:
             pop_up.close()
 
 
-    def remove_file(self):
+    def remove_file(self) -> None:
+        """Removes the selected file from the file list."""
         file_name = self.view.read_files_list.currentItem().text()
         self.core.remove_file(file_name)
         self.view.update_file_list(self.core.files)
 
 
-    def create_player(self):
+    def create_player(self) -> None:
+        """Creates a new player and updates the player list in the view."""
         self.core.create_player()
         self.view.update_player_list(self.core.players)
 
-    def show(self):
+    def show(self) -> None:
+        """Shows the home view."""
         self.view.show()
 
