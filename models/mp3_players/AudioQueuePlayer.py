@@ -14,6 +14,7 @@ class AudioQueuePlayer:
     play_order: list[str]  # List of sound_ids in the order they should be played
     final_audio: AudioFile | None  # Combined audio file to be played
     channel: pygame.mixer.Channel | None  # Channel used to play the sound file
+    sound : pygame.mixer.Sound
     is_playing: bool  # Flag to check if the sound file is playing
     paused: bool  # Flag to check if playback is paused
 
@@ -49,13 +50,14 @@ class AudioQueuePlayer:
             combined_audio += audio_file
 
         self.final_audio = AudioFile.from_segment(combined_audio)
+        self.sound = pygame.mixer.Sound(self.final_audio.to_buffer())
 
     def play(self):
         """
         Play the combined audio file that includes all sounds and silences.
         """
         if not self.is_playing and self.final_audio:
-            self.channel = pygame.mixer.Sound(self.final_audio.to_buffer()).play()
+            self.channel = self.sound.play()
             self.is_playing = True
 
     def pause(self):
@@ -70,7 +72,7 @@ class AudioQueuePlayer:
         """
         Resume the paused playback, if paused.
         """
-        if self.channel and not self.is_playing and self.paused:
+        if self.channel and self.is_playing and self.paused:
             self.channel.unpause()
             self.paused = False
             self.is_playing = True
