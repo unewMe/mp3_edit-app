@@ -7,6 +7,7 @@ from views.HomeView import HomeView
 from cores.HomeCore import HomeCore
 from views.popups.PopUpMsg import PopUpMsg
 from views.tools.url import UrlPopUp
+from views.tools.ai import AiPopUp
 
 
 class HomeController:
@@ -14,7 +15,7 @@ class HomeController:
         self.view = HomeView(self)
         self.core = HomeCore()
         self.pop_url = UrlPopUp()
-        self.pop_ai = None
+        self.pop_ai = AiPopUp()
 
         self.view.add_file_button.clicked.connect(self.add_file)
         self.view.remove_files_button.clicked.connect(self.remove_file)
@@ -25,6 +26,7 @@ class HomeController:
         self.view.created_players_list.itemSelectionChanged.connect(self.view.update_player_info)
 
         self.view.add_to_player_button.clicked.connect(self.add_file_to_player)
+        self.view.remove_from_player_button.clicked.connect(self.remove_file_from_player)
 
         self.view.audios_in_player_list.itemSelectionChanged.connect(self.view.update_audio_info)
 
@@ -40,7 +42,10 @@ class HomeController:
         self.view.multiplayer_slider.sliderReleased.connect(self.music_slider_changed)
 
         self.view.file_action_url.triggered.connect(self.url_download)
+        self.view.file_action_ai.triggered.connect(self.ai_download)
 
+        self.view.queue_up_button.clicked.connect(self.queue_up)
+        self.view.queue_down_button.clicked.connect(self.queue_down)
 
     def show(self) -> None:
         """Shows the home view."""
@@ -81,9 +86,16 @@ class HomeController:
         file_name = self.view.read_files_list.currentItem().text()
         player_name = self.view.created_players_list.currentItem().text()
         if self.core.add_file_to_player(file_name, player_name):
-            self.view.update_player_audio_list(self.core.players[player_name].sound_files.keys())
+            self.view.update_player_audio_list(self.core.players[player_name].play_order)
         else:
             PopUpMsg("Error", "File already added to player.", buttons=QMessageBox.Ok, if_exec=True)
+
+    def remove_file_from_player(self) -> None:
+        """Removes the selected file from the selected player."""
+        file_name = self.view.audios_in_player_list.currentItem().text()
+        player_name = self.view.created_players_list.currentItem().text()
+        self.core.remove_from_player(file_name, player_name)
+        self.view.update_player_audio_list(self.core.players[player_name].play_order)
 
 
     def play_multiplayer(self) -> None:
@@ -132,6 +144,38 @@ class HomeController:
     def url_download(self):
         self.pop_url.show()
 
+    def ai_download(self):
+        self.pop_ai.show()
+
+    def check_if_audio(self):
+        return self.core.check_if_any_audio_is_loaded_into_player()
+
+    def queue_changed(self):
+        self.view.created_players_list.currentItem().text()
+        self.core.update_player_order(self.view.created_players_list.currentItem().text(),
+                                      [self.view.audios_in_player_list.item(i).text() for i in
+                                       range(self.view.audios_in_player_list.count())])
+
+    def queue_up(self):
+        item1 = self.view.audios_in_player_list.currentItem().text()
+        item2 = self.view.audios_in_player_list.item(self.view.audios_in_player_list.currentRow() - 1).text()
+        self.view.audios_in_player_list.item(self.view.audios_in_player_list.currentRow() - 1).setText(item1)
+        self.view.audios_in_player_list.currentItem().setText(item2)
+
+        self.view.audios_in_player_list.setCurrentRow(self.view.audios_in_player_list.currentRow() - 1)
+
+        self.queue_changed()
+
+
+    def queue_down(self):
+        item1 = self.view.audios_in_player_list.currentItem().text()
+        item2 = self.view.audios_in_player_list.item(self.view.audios_in_player_list.currentRow() + 1).text()
+        self.view.audios_in_player_list.item(self.view.audios_in_player_list.currentRow() + 1).setText(item1)
+        self.view.audios_in_player_list.currentItem().setText(item2)
+
+        self.view.audios_in_player_list.setCurrentRow(self.view.audios_in_player_list.currentRow() + 1)
+
+        self.queue_changed()
 
 
 
