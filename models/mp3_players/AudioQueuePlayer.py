@@ -5,6 +5,7 @@ import pygame
 from models.audio_edit.AudioFile import AudioFile
 from models.audio_edit.filters import FilterType
 
+
 class AudioQueuePlayer:
     """
     Class to play a queue of audio files in sequence.
@@ -14,7 +15,7 @@ class AudioQueuePlayer:
     play_order: list[str]  # List of sound_ids in the order they should be played
     final_audio: AudioFile | None  # Combined audio file to be played
     channel: pygame.mixer.Channel | None  # Channel used to play the sound file
-    sound : pygame.mixer.Sound
+    sound: pygame.mixer.Sound
     is_playing: bool  # Flag to check if the sound file is playing
     paused: bool  # Flag to check if playback is paused
 
@@ -24,7 +25,6 @@ class AudioQueuePlayer:
         self.play_order = []
         self.final_audio = None
         self.channel = None
-        self.is_playing = False
         self.paused = False
 
     def load(self, sound_id: str, audio_file: AudioFile, delay: int = 0):
@@ -58,7 +58,6 @@ class AudioQueuePlayer:
         """
         if not self.is_playing and self.final_audio:
             self.channel = self.sound.play()
-            self.is_playing = True
 
     def pause(self):
         """
@@ -75,7 +74,6 @@ class AudioQueuePlayer:
         if self.channel and self.is_playing and self.paused:
             self.channel.unpause()
             self.paused = False
-            self.is_playing = True
 
     def stop(self):
         """
@@ -83,9 +81,7 @@ class AudioQueuePlayer:
         """
         if self.channel:
             self.channel.stop()
-        self.is_playing = False
         self.paused = False
-        self.play_order.clear()
 
     def set_play_order(self, play_order: list[str]):
         """
@@ -106,9 +102,33 @@ class AudioQueuePlayer:
         """
         if sound_id in self.sound_files:
             self.sound_files[sound_id].set_volume(volume)
+
     def set_volume(self, volume: float):
         """
         Set the volume of the playback.
         """
         if self.channel:
             self.channel.set_volume(volume)
+
+    def set_time(self, time: float):
+        """
+        Set the playback time in milliseconds.
+        """
+        if self.final_audio and self.channel:
+            self.channel.stop()  # Stop current playback
+            self.sound = pygame.mixer.Sound(buffer=self.final_audio[time*1000:].raw_data)
+            self.channel = self.sound.play()
+            self.channel.pause() if self.channel else None
+
+    @property
+    def is_playing(self) -> bool:
+        return self.channel.get_busy() if self.channel else False
+
+    def remove(self, sound_id: str):
+        """
+        Remove the audio file corresponding to the given sound_id.
+        """
+        if sound_id in self.sound_files:
+            self.sound_files.pop(sound_id)
+            if sound_id in self.play_order:
+                self.play_order.remove(sound_id)
