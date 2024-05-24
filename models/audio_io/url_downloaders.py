@@ -14,7 +14,7 @@ class YouTubeDownloader:
     downloaded: int = 0
     filesize: int = 0
 
-    def download_audio(self, url, filelocation):
+    def download_audio(self, url, filelocation, filename):
         """
         Download audio from YouTube to mp3
         """
@@ -24,7 +24,7 @@ class YouTubeDownloader:
             yt = YouTube(url)
             stream = yt.streams.filter(only_audio=True).first()
             self.filesize = stream.filesize
-            filename = ''.join([i for i in re.findall('[\w +/.]', yt.title) if i.isalpha()])
+            #filename = ''.join([i for i in re.findall('[\w +/.]', yt.title) if i.isalpha()])
             filepath = f'{filelocation}/{filename}.mp3'
             with open(filepath, 'wb') as f:
                 self.is_paused = self.is_cancelled = False
@@ -53,7 +53,9 @@ class YouTubeDownloader:
         except TimeoutError:
             raise TimeoutError("Request timed out.")
         except IOError:
-            raise IOError("File operation error.")
+            raise IOError("Incorrect path.")
+        except exp.RegexMatchError:
+            raise Exception("Invalid URL.")
         except Exception as e:
             raise Exception(f"An unexpected error occurred: {str(e)}")
 
