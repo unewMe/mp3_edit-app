@@ -11,16 +11,18 @@ class MultiPlayer:
     """
 
     players: dict[str, Player]  # Dict of Player objects
-    is_playing: bool  # Flag to check if the sound file is playing
-    timer: Timer  # Timer object to manage the playback time
+    timer: Timer | None  # Timer object to manage the playback time
 
-    def __init__(self, players: dict[str, Player]):
-        self.players = players
-        self.is_playing = False
-        self.timer = Timer()
+    def __init__(self):
+        self.players = {}
+        self.timer = None
+
+    def add_player(self, player_name: str, player: Player) -> None:
+        """Adds a player to the player list."""
+        self.players[player_name] = player
 
     def play_all(self) -> None:
-        self.is_playing = True
+        self.timer = Timer()
         for _, player in self.players.items():
             player.play()
         self.timer.start()
@@ -36,7 +38,6 @@ class MultiPlayer:
         self.timer.resume()
 
     def stop_all(self) -> None:
-        self.is_playing = False
         for _, player in self.players.items():
             player.stop()
         self.timer.stop()
@@ -44,14 +45,7 @@ class MultiPlayer:
     def export(self, file_path: str, format="mp3") -> None:
         """Combines all audio files from all players into one and exports them to a single file."""
 
-        max_length = 0
-        for _, player in self.players.items():
-            if isinstance(player.final_audio, AudioSegment):
-                max_length = max(max_length, len(player.final_audio))
-            else:
-                raise ValueError("player.final_audio is not an instance of AudioSegment")
-
-        combined_audio = AudioSegment.silent(duration=max_length)
+        combined_audio = AudioSegment.silent(duration=self.get_max_length())
 
         for _, player in self.players.items():
             if isinstance(player.final_audio, AudioSegment):
@@ -63,4 +57,22 @@ class MultiPlayer:
 
     def get_time(self) -> tuple[int, int, int]:
         hours, minutes, seconds = self.timer.get_time()
-        return int(hours), int(minutes), int(seconds)
+        return round(hours), round(minutes), round(seconds)
+
+    def get_max_length(self) -> float:
+        max_length = 0
+        for _, player in self.players.items():
+            max_length = max(max_length, len(player.final_audio))
+        return max_length
+
+    @property
+    def is_playing(self) -> bool:
+        for _, player in self.players.items():
+            if not player.is_playing:
+                return False
+        return True
+
+    def set_time(self, time: float) -> None:
+        for _, player in self.players.items():
+            player.set_time(time)
+        self.timer.set_time(time)
