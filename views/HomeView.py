@@ -1,6 +1,7 @@
 from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect, Qt)
-from PySide6.QtGui import QFont
-from PySide6.QtWidgets import (QComboBox, QFrame, QLabel, QLineEdit, QListView, QPushButton, QSlider, QTabWidget, QWidget, QMainWindow, QListWidget, QMenuBar, QVBoxLayout)
+from PySide6.QtGui import QFont, QAction
+from PySide6.QtWidgets import (QComboBox, QFrame, QLabel, QLineEdit, QListView, QPushButton, QSlider, QTabWidget,
+                               QWidget, QMainWindow, QListWidget, QMenuBar, QVBoxLayout)
 
 
 class HomeView(QMainWindow):
@@ -19,7 +20,8 @@ class HomeView(QMainWindow):
 
     def update_geometry(self, screen_width, screen_height):
         def scale_rect(x, y, width, height):
-            return QRect(int(x * screen_width / 1920), int(y * screen_height / 1080), int(width * screen_width / 1920), int(height * screen_height / 1080))
+            return QRect(int(x * screen_width / 1920), int(y * screen_height / 1080), int(width * screen_width / 1920),
+                         int(height * screen_height / 1080))
 
         self.tab_view.setGeometry(scale_rect(10, 40, 701, 481))
         self.read_files_list.setGeometry(scale_rect(20, 60, 641, 391))
@@ -105,8 +107,12 @@ class HomeView(QMainWindow):
         self.setObjectName("MainWindow")
         self.setWindowTitle("Audio editor")
 
-        self.menuBar().addMenu("File")
+        self.file_action_mb = self.menuBar().addMenu("File")
+        self.file_action_url = QAction("Url Download", self)
+        self.file_action_mb.addAction(self.file_action_url)
 
+        self.file_action_ai = QAction("AI Generator", self)
+        self.file_action_mb.addAction(self.file_action_ai)
 
         self.tab_view = QTabWidget(self)
 
@@ -119,6 +125,7 @@ class HomeView(QMainWindow):
 
         self.remove_files_button = QPushButton(self.files)
         self.remove_files_button.setText("Remove")
+        self.remove_files_button.setEnabled(False)
 
         self.read_files_label = QLabel(self.files)
         font = QFont()
@@ -139,6 +146,7 @@ class HomeView(QMainWindow):
 
         self.remove_player_button = QPushButton(self.players)
         self.remove_player_button.setText("Remove")
+        self.remove_player_button.setEnabled(False)
 
         self.created_players_list = QListWidget(self.players)
 
@@ -152,6 +160,7 @@ class HomeView(QMainWindow):
 
         self.remove_generated_plot_button = QPushButton(self.plots)
         self.remove_generated_plot_button.setText("Remove")
+        self.remove_generated_plot_button.setEnabled(False)
 
         self.generated_plots_list = QListView(self.plots)
 
@@ -163,9 +172,11 @@ class HomeView(QMainWindow):
 
         self.play_button = QPushButton(self.main_player_frame)
         self.play_button.setText("Play")
+        self.play_button.setEnabled(False)
 
         self.stop_button = QPushButton(self.main_player_frame)
         self.stop_button.setText("Stop")
+        self.stop_button.setEnabled(False)
 
         self.multiplayer_slider = QSlider(self.main_player_frame)
         self.multiplayer_slider.setOrientation(Qt.Orientation.Horizontal)
@@ -186,7 +197,7 @@ class HomeView(QMainWindow):
         self.playing_time_label.setText("00:00:00")
 
         self.max_time_label = QLabel(self.main_player_frame)
-        self.max_time_label.setText("/  00:00:00")
+        self.max_time_label.setText("00:00:00")
 
         self.player_editing_frame = QFrame(self)
         self.player_editing_frame.setFrameShape(QFrame.Shape.StyledPanel)
@@ -194,7 +205,7 @@ class HomeView(QMainWindow):
 
         self.editing_player_label = QLabel(self.player_editing_frame)
         self.editing_player_label.setFont(font)
-        self.editing_player_label.setText("Player:")
+        self.editing_player_label.setText("Player: Not Selected")
 
         self.audios_in_player_list = QListWidget(self.player_editing_frame)
         self.audios_in_player_label = QLabel(self.player_editing_frame)
@@ -312,24 +323,39 @@ class HomeView(QMainWindow):
         self.line_5.setFrameShape(QFrame.Shape.HLine)
         self.line_5.setFrameShadow(QFrame.Shadow.Sunken)
 
+        self.hz62_slider.raise_()
+        self.hz125_slider.raise_()
+        self.hz250_slider.raise_()
+        self.hz500_slider.raise_()
+        self.khz1_slider.raise_()
+        self.khz2_slider.raise_()
+        self.khz4_slider.raise_()
+        self.khz8_slider.raise_()
+        self.khz16_slider.raise_()
+
         self.dB12_label = QLabel(self.audio_editing_frame)
-        self.dB12_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter)
+        self.dB12_label.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter)
         self.dB12_label.setText("+12 dB")
 
         self.db6_label = QLabel(self.audio_editing_frame)
-        self.db6_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter)
+        self.db6_label.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter)
         self.db6_label.setText("+6 dB")
 
         self.dB0_label = QLabel(self.audio_editing_frame)
-        self.dB0_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter)
+        self.dB0_label.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter)
         self.dB0_label.setText("0 dB")
 
         self.dBn6_label = QLabel(self.audio_editing_frame)
-        self.dBn6_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter)
+        self.dBn6_label.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter)
         self.dBn6_label.setText("-6 dB")
 
         self.dbn12_label = QLabel(self.audio_editing_frame)
-        self.dbn12_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter)
+        self.dbn12_label.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter)
         self.dbn12_label.setText("-12 dB")
 
         self.audio_plots_label = QLabel(self.audio_editing_frame)
@@ -347,7 +373,7 @@ class HomeView(QMainWindow):
 
         self.editing_audio_label = QLabel(self.audio_editing_frame)
         self.editing_audio_label.setFont(font)
-        self.editing_audio_label.setText("Editing")
+        self.editing_audio_label.setText("Editing: Not Selected")
 
         self.audio_volume_slider = QSlider(self.audio_editing_frame)
         self.audio_volume_slider.setMaximum(100)
@@ -371,12 +397,15 @@ class HomeView(QMainWindow):
 
         self.remove_from_player_button = QPushButton(self.player_editing_frame)
         self.remove_from_player_button.setText("Remove")
+        self.remove_from_player_button.setEnabled(False)
 
         self.queue_up_button = QPushButton(self.player_editing_frame)
         self.queue_up_button.setText("Up")
+        self.queue_up_button.setEnabled(False)
 
         self.queue_down_button = QPushButton(self.player_editing_frame)
         self.queue_down_button.setText("Down")
+        self.queue_down_button.setEnabled(False)
 
         self.queue_label = QLabel(self.player_editing_frame)
         self.queue_label.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
@@ -396,11 +425,21 @@ class HomeView(QMainWindow):
         """Updates read files list"""
         self.read_files_list.clear()
         self.read_files_list.addItems(files)
+        if self.read_files_list.count() == 0:
+            self.remove_files_button.setEnabled(False)
+        else:
+            self.remove_files_button.setEnabled(True)
 
     def update_player_list(self, players):
         """Updates created players list"""
         self.created_players_list.clear()
         self.created_players_list.addItems(players)
+        if self.created_players_list.count() == 0:
+            self.remove_player_button.setEnabled(False)
+            self.play_button.setEnabled(False)
+            self.stop_button.setEnabled(False)
+        else:
+            self.remove_player_button.setEnabled(True)
 
     def update_player_info(self):
         """Updates player info"""
@@ -408,12 +447,60 @@ class HomeView(QMainWindow):
             player_name = self.created_players_list.currentItem().text()
             self.editing_player_label.setText(f"Player: {player_name}")
             self.choose_player_label.hide()
+            self.update_player_audio_list(self.controller.core.players[player_name].sound_files.keys())
         else:
-            self.editing_player_label.setText("Player:")
+            self.editing_player_label.setText("Player: Not Selected")
             self.choose_player_label.show()
+            self.audios_in_player_list.clear()
 
     def update_player_audio_list(self, audios):
         """Updates player audio list"""
         self.audios_in_player_list.clear()
         self.audios_in_player_list.addItems(audios)
+        if self.audios_in_player_list.count() == 0:
+            self.remove_from_player_button.setEnabled(False)
+            self.play_button.setEnabled(self.controller.check_if_audio())
+            self.stop_button.setEnabled(self.controller.check_if_audio())
+        else:
+            self.remove_from_player_button.setEnabled(True)
+            self.play_button.setEnabled(True)
+            self.stop_button.setEnabled(True)
 
+    def update_audio_info(self):
+        """Updates audio info"""
+        if self.audios_in_player_list.selectedItems():
+            audio_name = self.audios_in_player_list.currentItem().text()
+            self.editing_audio_label.setText(f"Editing: {audio_name}")
+            row = self.audios_in_player_list.row(self.audios_in_player_list.currentItem())
+
+            if row > 0:
+                self.queue_up_button.setEnabled(True)
+            else:
+                self.queue_up_button.setEnabled(False)
+
+            if row < self.audios_in_player_list.count() - 1:
+                self.queue_down_button.setEnabled(True)
+            else:
+                self.queue_down_button.setEnabled(False)
+
+            self.choose_audio_label.hide()
+        else:
+            self.editing_audio_label.setText("Editing: Not Selected")
+            self.choose_audio_label.show()
+            self.queue_up_button.setEnabled(False)
+            self.queue_down_button.setEnabled(False)
+
+    def update_max_timer_and_slider(self, seconds: int):
+        """Updates max timer and slider"""
+        hours = seconds // 3600
+        seconds %= 3600
+        minutes = seconds // 60
+        seconds %= 60
+        self.max_time_label.setText(f"{hours:02}:{minutes:02}:{seconds:02}")
+        self.multiplayer_slider.setMaximum(hours * 3600 + minutes * 60 + seconds)
+
+    def update_timer_and_slider(self, hour_minut_second: tuple[int, int, int]):
+        """Updates timer and slider"""
+        self.playing_time_label.setText(
+            f"{hour_minut_second[0]:02}:{hour_minut_second[1]:02}:{hour_minut_second[2]:02}")
+        self.multiplayer_slider.setValue(hour_minut_second[0] * 3600 + hour_minut_second[1] * 60 + hour_minut_second[2])
