@@ -5,7 +5,6 @@ from models.mp3_players.MultiPlayer import MultiPlayer
 
 
 class HomeCore:
-
     files: dict[str, AudioFile]
     players: dict[str, AudioQueuePlayer]
     player_id: int
@@ -35,9 +34,8 @@ class HomeCore:
         """Creates a new player and adds it to the player list."""
         player = AudioQueuePlayer()
         self.players[f"Player{self.player_id}"] = player
-        self.multiplayer.add_player(f"{self.player_id}",player)
+        self.multiplayer.add_player(f"{self.player_id}", player)
         self.player_id += 1
-
 
     def remove_player(self, player_name) -> None:
         """Removes the selected player from the player list."""
@@ -51,30 +49,31 @@ class HomeCore:
 
         return True
 
-    def play_multiplayer(self):
-        """Plays all the audio files from all the players."""
+    def combine_audio_files(self) -> None:
+        """Combines all audio files from the selected player."""
         for player in self.players.values():
             player.combine_audio_files()
+
+    def play_multiplayer(self) -> None:
+        """Plays all the audio files from all the players."""
         self.multiplayer.play_all()
 
-    def pause_multiplayer(self):
+    def pause_multiplayer(self) -> None:
         """Pauses the playback of all players."""
         self.multiplayer.pause_all()
 
-    def resume_multiplayer(self):
+    def resume_multiplayer(self) -> None:
         """Resumes the playback of all players."""
         self.multiplayer.resume_all()
 
-    def stop_multiplayer(self):
+    def stop_multiplayer(self) -> None:
         """Stops the playback of all players."""
         self.multiplayer.stop_all()
 
-    def get_max_length_in_seconds(self):
+    def get_max_length_in_seconds(self) -> int:
         """Returns the maximum length of all audio files."""
         return round(self.multiplayer.get_max_length() / 1000)
 
-
-
-
-
-
+    def get_current_time(self) -> tuple[int, int, int]:
+        """Returns the current playback time."""
+        return self.multiplayer.get_time()
