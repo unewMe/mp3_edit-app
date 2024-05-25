@@ -3,7 +3,7 @@ import librosa
 import numpy as np
 import matplotlib.pyplot as plt
 
-class AudioSegmentation:
+class SegmentationAnalysis:
     def __init__(self, audio_segment: AudioSegment):
         self.audio_segment = audio_segment
         self.y, self.sr = self._convert_to_librosa_format()
@@ -34,7 +34,8 @@ class AudioSegmentation:
         beat_times = librosa.frames_to_time(beats, sr=self.sr)
         return beat_times
 
-    def plot_silence_segments(self, silence_segments):
+    def plot_silence_segments(self, file_path: str):
+        silence_segments = self.detect_silence_segments()
         plt.figure(figsize=(10, 4))
         plt.plot(self.y, label='Audio Signal')
         for i, (start, stop) in enumerate(silence_segments):
@@ -47,9 +48,10 @@ class AudioSegmentation:
         plt.title('Silence Segments')
         plt.legend(loc='upper right')
         plt.tight_layout()
-        plt.show()
+        plt.savefig(file_path)
 
-    def plot_beat_segments(self, beat_times):
+    def plot_beat_segments(self, file_path: str):
+        beat_times = self.segment_by_beats()
         plt.figure(figsize=(10, 4))
         times = np.arange(len(self.y)) / self.sr
         plt.plot(times, self.y, label='Audio Signal')
@@ -63,16 +65,7 @@ class AudioSegmentation:
         plt.title('Beat Segments')
         plt.legend(loc='upper right')
         plt.tight_layout()
-        plt.show()
+        plt.savefig(file_path)
 
 
-audio_segment = AudioSegment.from_file('Beethoven.mp3')
-segmentation = AudioSegmentation(audio_segment)
 
-
-silence_segments = segmentation.detect_silence_segments()
-segmentation.plot_silence_segments(silence_segments)
-
-
-beat_times = segmentation.segment_by_beats()
-segmentation.plot_beat_segments(beat_times)

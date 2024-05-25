@@ -4,8 +4,8 @@ import librosa.display
 import numpy as np
 import matplotlib.pyplot as plt
 
-class RhythmicAnalysis:
 
+class RhythmicAnalysis:
     audio_segment: AudioSegment
     y: np.ndarray
     sr: int
@@ -28,7 +28,7 @@ class RhythmicAnalysis:
         sr = self.audio_segment.frame_rate
         return y, sr
 
-    def analyze_tempogram(self):
+    def analyze_tempogram(self, file_path: str):
         onset_env = librosa.onset.onset_strength(y=self.y, sr=self.sr)
         tempogram = librosa.feature.tempogram(onset_envelope=onset_env, sr=self.sr)
 
@@ -37,9 +37,9 @@ class RhythmicAnalysis:
         plt.title('Tempogram')
         plt.colorbar()
         plt.tight_layout()
-        plt.show()
+        plt.savefig(file_path)
 
-    def analyze_beats(self):
+    def analyze_beats(self, file_path: str):
         onset_env = librosa.onset.onset_strength(y=self.y, sr=self.sr)
         tempo, beats = librosa.beat.beat_track(onset_envelope=onset_env, sr=self.sr)
 
@@ -50,13 +50,4 @@ class RhythmicAnalysis:
         plt.xlabel('Time (s)')
         plt.ylabel('Onset Strength')
         plt.tight_layout()
-        plt.show()
-
-        print(f'Tempo: {tempo} BPM')
-        print(f'Beats: {times}')
-
-
-audio_segment = AudioSegment.from_file('Beethoven.mp3')
-analysis = RhythmicAnalysis(audio_segment)
-analysis.analyze_tempogram()
-analysis.analyze_beats()
+        plt.savefig(file_path)

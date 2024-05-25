@@ -19,7 +19,7 @@ class AudioVisualizer:
         self.samples = np.array(self.audio_file.get_array_of_samples())
         self.frame_rate = self.audio_file.frame_rate
 
-    def plot_waveform(self):
+    def plot_waveform(self, file_path: str):
         """
         Visualizes the waveform of the sound file.
         """
@@ -29,9 +29,9 @@ class AudioVisualizer:
         plt.xlabel('Sample Number')
         plt.ylabel('Amplitude')
         plt.grid(True)
-        plt.show()
+        plt.savefig(file_path)
 
-    def plot_spectrogram(self):
+    def plot_spectrogram(self, file_path: str):
         """
         Visualizes the intensity of the sound at different frequencies over time.
         """
@@ -42,5 +42,7 @@ class AudioVisualizer:
         plt.xlabel('Time [sec]')
         plt.title('Spectrogram')
         plt.colorbar(label='Intensity [dB]')
-        plt.show()
+        plt.tight_layout()
+        plt.savefig(file_path)
+
 
