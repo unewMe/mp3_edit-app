@@ -1,7 +1,7 @@
 from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect, Qt)
 from PySide6.QtGui import QFont, QAction
 from PySide6.QtWidgets import (QComboBox, QFrame, QLabel, QLineEdit, QListView, QPushButton, QSlider, QTabWidget,
-                               QWidget, QMainWindow, QListWidget, QMenuBar, QVBoxLayout)
+                               QWidget, QMainWindow, QListWidget, QMenuBar, QVBoxLayout, QAbstractItemView)
 
 
 class HomeView(QMainWindow):
@@ -45,6 +45,7 @@ class HomeView(QMainWindow):
         self.main_volume_slider.setGeometry(scale_rect(1010, 440, 160, 22))
         self.main_volume_label.setGeometry(scale_rect(950, 442, 49, 16))
         self.plot_display_frame.setGeometry(scale_rect(70, 30, 1071, 361))
+        self.plot_display_label.setGeometry(scale_rect(70, 30, 1071, 361))
         self.playing_time_label.setGeometry(scale_rect(20, 450, 49, 16))
         self.max_time_label.setGeometry(scale_rect(70, 450, 61, 16))
 
@@ -84,8 +85,8 @@ class HomeView(QMainWindow):
         self.audio_volume_slider.setGeometry(scale_rect(30, 160, 111, 22))
         self.audio_delay_edit.setGeometry(scale_rect(60, 250, 41, 22))
         self.audio_filters_label.setGeometry(scale_rect(182, 60, 61, 21))
-        self.add_filter_butoon.setGeometry(scale_rect(292, 60, 75, 24))
-        self.remove_all_filters_button.setGeometry(scale_rect(370, 60, 75, 24))
+        self.add_filter_butoon.setGeometry(scale_rect(370, 60, 75, 24))
+        self.remove_all_filters_button.setGeometry(scale_rect(370, 30, 75, 24))
 
         self.audio_plots_label.setGeometry(scale_rect(502, 60, 61, 21))
         self.plots_type_list.setGeometry(scale_rect(502, 90, 261, 261))
@@ -102,6 +103,8 @@ class HomeView(QMainWindow):
         self.queue_label.setGeometry(scale_rect(498, 200, 49, 16))
         self.choose_audio_label.setGeometry(scale_rect(-10, -10, 1321, 451))
         self.choose_player_label.setGeometry(scale_rect(-160, -10, 2411, 651))
+
+        self.filter_type_combobox.setGeometry(scale_rect(292, 60, 75, 24))
 
     def initUI(self):
         self.setObjectName("MainWindow")
@@ -162,7 +165,7 @@ class HomeView(QMainWindow):
         self.remove_generated_plot_button.setText("Remove")
         self.remove_generated_plot_button.setEnabled(False)
 
-        self.generated_plots_list = QListView(self.plots)
+        self.generated_plots_list = QListWidget(self.plots)
 
         self.tab_view.addTab(self.plots, "Plots")
 
@@ -193,6 +196,9 @@ class HomeView(QMainWindow):
         self.plot_display_frame.setFrameShape(QFrame.Shape.Box)
         self.plot_display_frame.setFrameShadow(QFrame.Shadow.Sunken)
 
+        self.plot_display_label = QLabel(self.plot_display_frame)
+
+
         self.playing_time_label = QLabel(self.main_player_frame)
         self.playing_time_label.setText("00:00:00")
 
@@ -216,7 +222,7 @@ class HomeView(QMainWindow):
         self.audio_editing_frame.setFrameShape(QFrame.Shape.StyledPanel)
         self.audio_editing_frame.setFrameShadow(QFrame.Shadow.Raised)
 
-        self.audio_filters_list = QListView(self.audio_editing_frame)
+        self.audio_filters_list = QListWidget(self.audio_editing_frame)
 
         self.hz62_slider = QSlider(self.audio_editing_frame)
         self.hz62_slider.setMinimum(-15)
@@ -280,6 +286,7 @@ class HomeView(QMainWindow):
         self.equalizer_label.setFont(font)
 
         self.audio_volume_label = QLabel(self.audio_editing_frame)
+        self.audio_volume_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.audio_volume_label.setText("Volume")
 
         self.audio_delay_label = QLabel(self.audio_editing_frame)
@@ -291,6 +298,9 @@ class HomeView(QMainWindow):
         self.audio_filters_label = QLabel(self.audio_editing_frame)
         self.audio_filters_label.setFont(font)
         self.audio_filters_label.setText("Filters")
+
+        self.filter_type_combobox = QComboBox(self.audio_editing_frame)
+        self.filter_type_combobox.setEditable(False)
 
         self.add_filter_butoon = QPushButton(self.audio_editing_frame)
         self.add_filter_butoon.setText("Add")
@@ -362,13 +372,14 @@ class HomeView(QMainWindow):
         self.audio_plots_label.setFont(font)
         self.audio_plots_label.setText("Plots")
 
-        self.plots_type_list = QListView(self.audio_editing_frame)
+        self.plots_type_list = QListWidget(self.audio_editing_frame)
+        self.plots_type_list.setSelectionMode(QAbstractItemView.MultiSelection)
 
         self.generate_plot_button = QPushButton(self.audio_editing_frame)
         self.generate_plot_button.setText("Generate")
 
         self.plots_type_combobox = QComboBox(self.audio_editing_frame)
-        self.plots_type_combobox.setEditable(True)
+        self.plots_type_combobox.setEditable(False)
         self.plots_type_combobox.setCurrentText("Type")
 
         self.editing_audio_label = QLabel(self.audio_editing_frame)
@@ -376,8 +387,9 @@ class HomeView(QMainWindow):
         self.editing_audio_label.setText("Editing: Not Selected")
 
         self.audio_volume_slider = QSlider(self.audio_editing_frame)
-        self.audio_volume_slider.setMaximum(100)
-        self.audio_volume_slider.setValue(100)
+        self.audio_volume_slider.setMaximum(80)
+        self.audio_volume_slider.setMinimum(5)
+        self.audio_volume_slider.setValue(80)
         self.audio_volume_slider.setOrientation(Qt.Orientation.Horizontal)
 
         self.cancel_audio_button = QPushButton(self.audio_editing_frame)
@@ -466,11 +478,24 @@ class HomeView(QMainWindow):
             self.play_button.setEnabled(True)
             self.stop_button.setEnabled(True)
 
-    def update_audio_info(self):
+    def update_audio_info(self, volume, delay, filters_in, filters_out, plots):
         """Updates audio info"""
         if self.audios_in_player_list.selectedItems():
             audio_name = self.audios_in_player_list.currentItem().text()
             self.editing_audio_label.setText(f"Editing: {audio_name}")
+
+            self.audio_delay_edit.setText(str(delay))
+            self.audio_volume_slider.setValue(volume)
+
+            self.filter_type_combobox.clear()
+            self.filter_type_combobox.addItems(filters_out)
+            self.audio_filters_list.clear()
+            self.audio_filters_list.addItems(filters_in)
+
+            self.plots_type_combobox.clear()
+            self.plots_type_combobox.addItems(plots.keys())
+            self.update_plot_type(plots)
+
             row = self.audios_in_player_list.row(self.audios_in_player_list.currentItem())
 
             if row > 0:
@@ -489,6 +514,10 @@ class HomeView(QMainWindow):
             self.choose_audio_label.show()
             self.queue_up_button.setEnabled(False)
             self.queue_down_button.setEnabled(False)
+            self.audio_delay_edit.setText("")
+            self.audio_volume_slider.setValue(80)
+            self.filter_type_combobox.clear()
+            self.audio_filters_list.clear()
 
     def update_max_timer_and_slider(self, seconds: int):
         """Updates max timer and slider"""
@@ -504,3 +533,17 @@ class HomeView(QMainWindow):
         self.playing_time_label.setText(
             f"{hour_minut_second[0]:02}:{hour_minut_second[1]:02}:{hour_minut_second[2]:02}")
         self.multiplayer_slider.setValue(hour_minut_second[0] * 3600 + hour_minut_second[1] * 60 + hour_minut_second[2])
+
+    def update_plot_type(self, plots):
+        """Updates plot type"""
+        self.plots_type_list.clear()
+        self.plots_type_list.addItems(plots[self.plots_type_combobox.currentText()])
+
+    def update_plots(self, plot):
+        """Updates plot"""
+        self.generated_plots_list.clear()
+        self.generated_plots_list.addItems(plot.keys())
+
+    def show_plot(self, plot):
+        self.plot_display_label.setPixmap(plot.scaled(self.plot_display_label.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+
