@@ -198,7 +198,6 @@ class HomeView(QMainWindow):
 
         self.plot_display_label = QLabel(self.plot_display_frame)
 
-
         self.playing_time_label = QLabel(self.main_player_frame)
         self.playing_time_label.setText("00:00:00")
 
@@ -478,7 +477,7 @@ class HomeView(QMainWindow):
             self.play_button.setEnabled(True)
             self.stop_button.setEnabled(True)
 
-    def update_audio_info(self, volume, delay, filters_in, filters_out, plots):
+    def update_audio_info(self, volume, delay, filters_in, filters_out, plots, bands):
         """Updates audio info"""
         if self.audios_in_player_list.selectedItems():
             audio_name = self.audios_in_player_list.currentItem().text()
@@ -495,6 +494,17 @@ class HomeView(QMainWindow):
             self.plots_type_combobox.clear()
             self.plots_type_combobox.addItems(plots.keys())
             self.update_plot_type(plots)
+
+            self.hz62_slider.setValue(bands[self.hz62_slider.property('band')])
+            self.hz125_slider.setValue(bands[self.hz125_slider.property('band')])
+            self.hz250_slider.setValue(bands[self.hz250_slider.property('band')])
+            self.hz500_slider.setValue(bands[self.hz500_slider.property('band')])
+            self.khz1_slider.setValue(bands[self.khz1_slider.property('band')])
+            self.khz2_slider.setValue(bands[self.khz2_slider.property('band')])
+            self.khz4_slider.setValue(bands[self.khz4_slider.property('band')])
+            self.khz8_slider.setValue(bands[self.khz8_slider.property('band')])
+            self.khz16_slider.setValue(bands[self.khz16_slider.property('band')])
+
 
             row = self.audios_in_player_list.row(self.audios_in_player_list.currentItem())
 
@@ -518,6 +528,8 @@ class HomeView(QMainWindow):
             self.audio_volume_slider.setValue(80)
             self.filter_type_combobox.clear()
             self.audio_filters_list.clear()
+            self.plots_type_combobox.clear()
+            self.plots_type_list.clear()
 
     def update_max_timer_and_slider(self, seconds: int):
         """Updates max timer and slider"""
@@ -537,7 +549,8 @@ class HomeView(QMainWindow):
     def update_plot_type(self, plots):
         """Updates plot type"""
         self.plots_type_list.clear()
-        self.plots_type_list.addItems(plots[self.plots_type_combobox.currentText()])
+        if self.plots_type_combobox.currentText():
+            self.plots_type_list.addItems(plots[self.plots_type_combobox.currentText()])
 
     def update_plots(self, plot):
         """Updates plot"""
@@ -545,5 +558,5 @@ class HomeView(QMainWindow):
         self.generated_plots_list.addItems(plot.keys())
 
     def show_plot(self, plot):
-        self.plot_display_label.setPixmap(plot.scaled(self.plot_display_label.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
-
+        self.plot_display_label.setPixmap(
+            plot.scaled(self.plot_display_label.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))

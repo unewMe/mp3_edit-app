@@ -8,6 +8,7 @@ from models.audio_edit.filters import FilterType
 from models.visualizers.basevis import AudioVisualizer
 from models.visualizers.rythmic import RhythmicAnalysis
 from models.visualizers.segmentation import SegmentationAnalysis
+from models.audio_edit.equalizer import Bands
 
 
 class HomeCore:
@@ -164,3 +165,13 @@ class HomeCore:
                 if "Spectrogram" in plots:
                     self.add_to_pixel_maps(f"{selected_audio}_spectrogram.png", file_path, analyzer,
                                            analyzer.plot_spectrogram)
+
+    def get_bands(self):
+        return [band for band in Bands]
+
+    def all_bands_value_from_audio(self, player, audio):
+        return self.players[player].get_all_bands_from_audio(audio)
+
+    def set_band_on_audio(self, player, audio, band, value):
+        self.players[player].set_band_on_audio(audio, band, value)
+

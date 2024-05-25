@@ -1,5 +1,7 @@
 import sys
 import os
+
+from PySide6 import QtCore
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QFileDialog, QMessageBox
 
@@ -10,10 +12,13 @@ from views.tools.url import UrlPopUp
 from views.tools.ai import AiPopUp
 from views.popups.selectors import PathSelectorPopUp
 
-plots_type_with_values = {"Rythmic": ["Tempogram", "Beats"], "Segmentation": ["Silent segments", "Beat segments"],"Base visualize": ["Waveform", "Spectrogram"]}
+plots_type_with_values = {"Rythmic": ["Tempogram", "Beats"], "Segmentation": ["Silent segments", "Beat segments"],
+                          "Base visualize": ["Waveform", "Spectrogram"]}
 
-class HomeController:
+
+class HomeController():
     def __init__(self):
+        super().__init__()
         self.view = HomeView(self)
         self.core = HomeCore()
         self.pop_url = UrlPopUp()
@@ -40,6 +45,26 @@ class HomeController:
         self.view.generate_plot_button.clicked.connect(self.generate_plot)
 
         self.view.generated_plots_list.itemSelectionChanged.connect(self.show_plot)
+
+        bands = self.core.get_bands()
+        self.view.hz62_slider.setProperty('band', bands[0])
+        self.view.hz62_slider.valueChanged.connect(lambda ind: self.set_band('0', ind))
+        self.view.hz125_slider.setProperty('band', bands[1])
+        self.view.hz125_slider.valueChanged.connect(lambda ind: self.set_band('1', ind))
+        self.view.hz250_slider.setProperty('band', bands[2])
+        self.view.hz250_slider.valueChanged.connect(lambda ind: self.set_band('2', ind))
+        self.view.hz500_slider.setProperty('band', bands[3])
+        self.view.hz500_slider.valueChanged.connect(lambda ind: self.set_band('3', ind))
+        self.view.khz1_slider.setProperty('band', bands[4])
+        self.view.khz1_slider.valueChanged.connect(lambda ind: self.set_band('4', ind))
+        self.view.khz2_slider.setProperty('band', bands[5])
+        self.view.khz2_slider.valueChanged.connect(lambda ind: self.set_band('5', ind))
+        self.view.khz4_slider.setProperty('band', bands[6])
+        self.view.khz4_slider.valueChanged.connect(lambda ind: self.set_band('6', ind))
+        self.view.khz8_slider.setProperty('band', bands[7])
+        self.view.khz8_slider.valueChanged.connect(lambda ind: self.set_band('7', ind))
+        self.view.khz16_slider.setProperty('band', bands[8])
+        self.view.khz16_slider.valueChanged.connect(lambda ind: self.set_band('8', ind))
 
         self.view.play_button.clicked.connect(self.play_multiplayer)
 
@@ -187,10 +212,13 @@ class HomeController:
     def update_audio_info(self):
         selected_audio = self.view.audios_in_player_list.currentItem().text()
         player_name = self.view.created_players_list.currentItem().text()
-        delay, volume = self.core.get_audio_delay_in_player(player_name, selected_audio), self.core.get_volume_on_sound_in_player(player_name, selected_audio)
+        delay, volume = self.core.get_audio_delay_in_player(player_name,
+                                                            selected_audio), self.core.get_volume_on_sound_in_player(
+            player_name, selected_audio)
         filters_in = self.core.get_filters_from_sound(player_name, selected_audio)
         filters_out = self.core.get_rest_of_filters(filters_in)
-        self.view.update_audio_info(delay=delay, volume=volume, filters_in=filters_in, filters_out=filters_out, plots=plots_type_with_values)
+        self.view.update_audio_info(delay=delay, volume=volume, filters_in=filters_in, filters_out=filters_out,
+                                    plots=plots_type_with_values, bands=self.core.all_bands_value_from_audio(player_name, selected_audio))
 
     def set_audio_volume(self):
         selected_audio = self.view.audios_in_player_list.currentItem().text()
@@ -205,7 +233,8 @@ class HomeController:
         try:
             if int(delay) < 0:
                 PopUpMsg("Error", "Delay must be a positive int number.", buttons=QMessageBox.Ok, if_exec=True)
-                self.view.audio_delay_edit.setText(f"{self.core.get_audio_delay_in_player(player_name, selected_audio)}")
+                self.view.audio_delay_edit.setText(
+                    f"{self.core.get_audio_delay_in_player(player_name, selected_audio)}")
         except ValueError:
             PopUpMsg("Error", "Delay must be a positive int number.", buttons=QMessageBox.Ok, if_exec=True)
             self.view.audio_delay_edit.setText(f"{self.core.get_audio_delay_in_player(player_name, selected_audio)}")
@@ -225,7 +254,8 @@ class HomeController:
         self.update_audio_info()
 
     def update_plots(self):
-        self.view.update_plot_type(plots_type_with_values)
+        if any(item.isSelected() for item in self.view.audios_in_player_list.selectedItems()):
+            self.view.update_plot_type(plots_type_with_values)
 
     def generate_plot(self):
         player_name = self.view.created_players_list.currentItem().text()
@@ -243,3 +273,8 @@ class HomeController:
         plot_name = self.view.generated_plots_list.currentItem().text()
         self.view.show_plot(self.core.plots[plot_name])
 
+
+    def set_band(self, cd, ind):
+        if cd == '0':
+            self.core.set_band_on_audio(self.view.created_players_list.currentItem().text(),
+                                        self.view.audios_in_player_list.currentItem().text(), self.view.hz62_slider.property('band'), ind)
