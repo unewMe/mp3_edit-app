@@ -94,14 +94,21 @@ class AudioQueuePlayer:
         Apply a filter to the audio file corresponding to the given sound_id.
         """
         if sound_id in self.sound_files:
-            self.sound_files[sound_id].apply_filter(filter_type)
+            self.sound_files[sound_id] = self.sound_files[sound_id].apply_filter(filter_type)
 
     def set_volume_on_sound(self, sound_id: str, volume: float):
         """
         Set the volume of the audio file corresponding to the given sound_id.
         """
         if sound_id in self.sound_files:
-            self.sound_files[sound_id].set_volume(volume)
+            self.sound_files[sound_id] = self.sound_files[sound_id].set_volume(volume)
+
+    def set_delay_on_sound(self, sound_id: str, delay: int):
+        """
+        Set the delay of the audio file corresponding to the given sound_id.
+        """
+        if sound_id in self.sound_files:
+            self.sound_files[sound_id].delay = delay
 
     def set_volume(self, volume: float):
         """
@@ -132,3 +139,42 @@ class AudioQueuePlayer:
             self.sound_files.pop(sound_id)
             if sound_id in self.play_order:
                 self.play_order.remove(sound_id)
+
+    def get_audio_delay(self, sound_id: str) -> int:
+        """
+        Get the delay of the audio file corresponding to the given sound_id.
+        """
+        if sound_id in self.sound_files:
+            return self.sound_files[sound_id].delay
+        return 0
+
+    def get_audio_volume(self, sound_id: str) -> float:
+        """
+        Get the volume of the audio file corresponding to the given sound_id.
+        """
+        if sound_id in self.sound_files:
+            return self.sound_files[sound_id].volume
+        return 0.0
+
+    def get_filters_from_sound(self, sound_id: str) -> list[FilterType]:
+        """
+        Get the filters applied to the audio file corresponding to the given sound_id.
+        """
+        if sound_id in self.sound_files:
+            return self.sound_files[sound_id].filters
+        return []
+
+    def set_band_on_audio(self, sound_id, band, value):
+        """
+        Set the band of the equalizer.
+        """
+        if sound_id in self.sound_files:
+            self.sound_files[sound_id] = self.sound_files[sound_id].set_value_on_band(band, value)
+
+    def get_all_bands_from_audio(self, sound_id):
+        """
+        Get all the bands from the equalizer.
+        """
+        if sound_id in self.sound_files:
+            return self.sound_files[sound_id].equalizer.get_all_bands()
+        return {}
