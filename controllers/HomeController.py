@@ -1,5 +1,5 @@
 import sys
-
+import os
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QFileDialog, QMessageBox
 
@@ -8,7 +8,9 @@ from cores.HomeCore import HomeCore
 from views.popups.PopUpMsg import PopUpMsg
 from views.tools.url import UrlPopUp
 from views.tools.ai import AiPopUp
+from views.popups.selectors import PathSelectorPopUp
 
+plots_type_with_values = {"Rythmic": ["Tempogram", "Beats"], "Segmentation": ["Silent segments", "Beat segments"],"Base visualize": ["Waveform", "Spectrogram"]}
 
 class HomeController:
     def __init__(self):
@@ -28,7 +30,16 @@ class HomeController:
         self.view.add_to_player_button.clicked.connect(self.add_file_to_player)
         self.view.remove_from_player_button.clicked.connect(self.remove_file_from_player)
 
-        self.view.audios_in_player_list.itemSelectionChanged.connect(self.view.update_audio_info)
+        self.view.audios_in_player_list.itemSelectionChanged.connect(self.update_audio_info)
+        self.view.audio_volume_slider.valueChanged.connect(self.set_audio_volume)
+        self.view.audio_delay_edit.editingFinished.connect(self.set_audio_delay)
+        self.view.add_filter_butoon.clicked.connect(self.add_filter_on_audio)
+        self.view.remove_all_filters_button.clicked.connect(self.remove_all_filters_on_audio)
+
+        self.view.plots_type_combobox.currentIndexChanged.connect(self.update_plots)
+        self.view.generate_plot_button.clicked.connect(self.generate_plot)
+
+        self.view.generated_plots_list.itemSelectionChanged.connect(self.show_plot)
 
         self.view.play_button.clicked.connect(self.play_multiplayer)
 
@@ -53,7 +64,8 @@ class HomeController:
 
     def add_file(self) -> None:
         """Opens a file dialog to select an audio file and adds it to the file list."""
-        file_path, _ = QFileDialog.getOpenFileName(self.view, "Open Audio File", "", "Audio Files (*.mp3);;All Files (*)")
+        file_path, _ = QFileDialog.getOpenFileName(self.view, "Open Audio File", "",
+                                                   "Audio Files (*.mp3);;All Files (*)")
         if file_path:
             # pop_up = PopUpMsg("Pending", "Rendering audio file, please wait...")
             # pop_up.show()
@@ -61,19 +73,16 @@ class HomeController:
             self.view.update_file_list(self.core.files)
             # pop_up.close()
 
-
     def remove_file(self) -> None:
         """Removes the selected file from the file list."""
         file_name = self.view.read_files_list.currentItem().text()
         self.core.remove_file(file_name)
         self.view.update_file_list(self.core.files)
 
-
     def create_player(self) -> None:
         """Creates a new player and updates the player list in the view."""
         self.core.create_player()
         self.view.update_player_list(self.core.players)
-
 
     def remove_player(self) -> None:
         """Removes the selected player from the player list."""
@@ -96,7 +105,6 @@ class HomeController:
         player_name = self.view.created_players_list.currentItem().text()
         self.core.remove_from_player(file_name, player_name)
         self.view.update_player_audio_list(self.core.players[player_name].play_order)
-
 
     def play_multiplayer(self) -> None:
         """Plays all the audio files from all the players."""
@@ -166,7 +174,6 @@ class HomeController:
 
         self.queue_changed()
 
-
     def queue_down(self):
         item1 = self.view.audios_in_player_list.currentItem().text()
         item2 = self.view.audios_in_player_list.item(self.view.audios_in_player_list.currentRow() + 1).text()
@@ -177,6 +184,62 @@ class HomeController:
 
         self.queue_changed()
 
+    def update_audio_info(self):
+        selected_audio = self.view.audios_in_player_list.currentItem().text()
+        player_name = self.view.created_players_list.currentItem().text()
+        delay, volume = self.core.get_audio_delay_in_player(player_name, selected_audio), self.core.get_volume_on_sound_in_player(player_name, selected_audio)
+        filters_in = self.core.get_filters_from_sound(player_name, selected_audio)
+        filters_out = self.core.get_rest_of_filters(filters_in)
+        self.view.update_audio_info(delay=delay, volume=volume, filters_in=filters_in, filters_out=filters_out, plots=plots_type_with_values)
 
+    def set_audio_volume(self):
+        selected_audio = self.view.audios_in_player_list.currentItem().text()
+        player_name = self.view.created_players_list.currentItem().text()
+        volume = self.view.audio_volume_slider.value()
+        self.core.set_volume_on_sound(player_name, selected_audio, volume)
 
+    def set_audio_delay(self):
+        selected_audio = self.view.audios_in_player_list.currentItem().text()
+        player_name = self.view.created_players_list.currentItem().text()
+        delay = self.view.audio_delay_edit.text()
+        try:
+            if int(delay) < 0:
+                PopUpMsg("Error", "Delay must be a positive int number.", buttons=QMessageBox.Ok, if_exec=True)
+                self.view.audio_delay_edit.setText(f"{self.core.get_audio_delay_in_player(player_name, selected_audio)}")
+        except ValueError:
+            PopUpMsg("Error", "Delay must be a positive int number.", buttons=QMessageBox.Ok, if_exec=True)
+            self.view.audio_delay_edit.setText(f"{self.core.get_audio_delay_in_player(player_name, selected_audio)}")
+        else:
+            self.core.set_audio_delay(player_name, selected_audio, int(delay))
+
+    def add_filter_on_audio(self):
+        selected_audio = self.view.audios_in_player_list.currentItem().text()
+        player_name = self.view.created_players_list.currentItem().text()
+        self.core.add_filter_on_audio(player_name, selected_audio, self.view.filter_type_combobox.currentText())
+        self.update_audio_info()
+
+    def remove_all_filters_on_audio(self):
+        selected_audio = self.view.audios_in_player_list.currentItem().text()
+        player_name = self.view.created_players_list.currentItem().text()
+        self.core.remove_all_filters_on_audio(player_name, selected_audio)
+        self.update_audio_info()
+
+    def update_plots(self):
+        self.view.update_plot_type(plots_type_with_values)
+
+    def generate_plot(self):
+        player_name = self.view.created_players_list.currentItem().text()
+        selected_audio = self.view.audios_in_player_list.currentItem().text()
+        type = self.view.plots_type_combobox.currentText()
+        plots = [plot.text() for plot in self.view.plots_type_list.selectedItems()]
+        path_selector = PathSelectorPopUp()
+        path_selector.exec_()
+        path = path_selector.directory
+        if os.path.isdir(path):
+            self.core.generate_plot(player_name, selected_audio, type, plots, path)
+            self.view.update_plots(self.core.plots)
+
+    def show_plot(self):
+        plot_name = self.view.generated_plots_list.currentItem().text()
+        self.view.show_plot(self.core.plots[plot_name])
 

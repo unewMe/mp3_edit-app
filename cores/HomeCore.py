@@ -1,18 +1,26 @@
+from PIL.ImageQt import QPixmap
+
 from models.audio_edit.AudioFile import AudioFile
 from models.mp3_players.AudioQueuePlayer import AudioQueuePlayer
 from models.audio_io.io import read_audio_file
 from models.mp3_players.MultiPlayer import MultiPlayer
+from models.audio_edit.filters import FilterType
+from models.visualizers.basevis import AudioVisualizer
+from models.visualizers.rythmic import RhythmicAnalysis
+from models.visualizers.segmentation import SegmentationAnalysis
 
 
 class HomeCore:
     files: dict[str, AudioFile]
     players: dict[str, AudioQueuePlayer]
+    plots: dict[str, QPixmap]
     player_id: int
     multiplayer: MultiPlayer
 
     def __init__(self):
         self.files = {}
         self.players = {}
+        self.plots = {}
         self.player_id = 1
         self.multiplayer = MultiPlayer()
 
@@ -90,3 +98,69 @@ class HomeCore:
     def remove_from_player(self, file_name, player_name):
         """Removes the selected file from the selected player."""
         self.players[player_name].remove(file_name)
+
+    def get_volume_on_sound_in_player(self, player_name, selected_audio):
+        return self.players[player_name].get_audio_volume(selected_audio)
+
+    def get_audio_delay_in_player(self, player_name, selected_audio):
+        return self.players[player_name].get_audio_delay(selected_audio)
+
+    def set_volume_on_sound(self, player_name, selected_audio, volume):
+        self.players[player_name].set_volume_on_sound(selected_audio, volume)
+
+    def set_audio_delay(self, player_name, selected_audio, param):
+        self.players[player_name].set_delay_on_sound(selected_audio, param)
+
+    def get_filters_from_sound(self, player_name, selected_audio):
+        return [filter.value for filter in self.players[player_name].get_filters_from_sound(selected_audio)]
+
+    def get_rest_of_filters(self, filters):
+        return [filter.value for filter in FilterType if filter.value not in filters]
+
+    def add_filter_on_audio(self, player_name, selected_audio, filter):
+        self.players[player_name].apply_filter(selected_audio, FilterType(filter))
+
+    def remove_all_filters_on_audio(self, player_name, selected_audio):
+        new_audio = AudioFile.combine_with_audio_segment(self.players[player_name].sound_files[selected_audio],
+                                                         self.files[selected_audio])
+        new_audio.filters = []
+        self.players[player_name].load(selected_audio, new_audio)
+
+    def add_to_pixel_maps(self, name, file_path, analyzer, function_name):
+
+        path = f"{file_path}/{name}"
+        function = getattr(analyzer, function_name.__name__)
+        function(path)
+        if name in self.plots:
+            while name in self.plots:
+                name = name.split(".")[0] + "_copy.png"
+        self.plots[name] = QPixmap(path)
+
+    def generate_plot(self, player_name, selected_audio, type, plots, file_path):
+        audio = self.players[player_name].sound_files[selected_audio]
+        match type:
+            case "Rythmic":
+                analyzer = RhythmicAnalysis(audio)
+                if "Tempogram" in plots:
+                    self.add_to_pixel_maps(f"{selected_audio}_tempogram.png", file_path, analyzer,
+                                           analyzer.analyze_tempogram)
+
+                if "Beats" in plots:
+                    self.add_to_pixel_maps(f"{selected_audio}_beats.png", file_path, analyzer, analyzer.analyze_beats)
+
+            case "Segmentation":
+                analyzer = SegmentationAnalysis(audio)
+                if "Silent segments" in plots:
+                    self.add_to_pixel_maps(f"{selected_audio}_silent_segments.png", file_path, analyzer,
+                                           analyzer.plot_silence_segments)
+                if "Beat segments" in plots:
+                    self.add_to_pixel_maps(f"{selected_audio}_beat_segments.png", file_path, analyzer,
+                                           analyzer.plot_silence_segments)
+            case "Base visualize":
+                analyzer = AudioVisualizer(audio)
+                if "Waveform" in plots:
+                    self.add_to_pixel_maps(f"{selected_audio}_waveform.png", file_path, analyzer,
+                                           analyzer.plot_waveform)
+                if "Spectrogram" in plots:
+                    self.add_to_pixel_maps(f"{selected_audio}_spectrogram.png", file_path, analyzer,
+                                           analyzer.plot_spectrogram)
