@@ -3,6 +3,7 @@ from PySide6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayo
 from models.audio_io.url_downloaders import YouTubeDownloader
 from views.popups.PopUpMsg import PopUpMsg
 from models.audio_io.ai_generators import LeapMusicGenerator
+from .utils import is_valid_filename
 
 class AiPopUp(QWidget):
     def __init__(self):
@@ -20,10 +21,12 @@ class AiPopUp(QWidget):
 
         self.api_key_label = QLabel('Your API KEY:', self)
         self.api_key_input = QLineEdit(self)
-        self.api_key_input.setPlaceholderText('Enter your API KEY') if not self.api_key else self.path_input.setText(self.api_key)
+        self.api_key_input.setPlaceholderText('Enter your API KEY') if not self.api_key else self.api_key_input.setText(self.api_key)
 
         self.path_label = QLabel('Path:', self)
         self.path_input = QLineEdit(self)
+        self.path_input.setReadOnly(True)
+
         self.setpath_button = QPushButton('Set Path', self)
         self.setpath_button.clicked.connect(self.set_path)
 
@@ -73,11 +76,18 @@ class AiPopUp(QWidget):
         filename = self.filename_input.text()
         self.leap.set_api_key(self.api_key)
 
-        try:
-            self.leap.generate(prompt, melody, duration, path,filename)
-        except ValueError as e:
-            PopUpMsg('Error', str(e), buttons=QMessageBox.Ok, if_exec=True)
+        if path and prompt and melody and duration and filename:
+            try:
+                self.leap.generate(prompt, melody, duration, path,filename)
+            except ValueError as e:
+                PopUpMsg('Error', str(e), buttons=QMessageBox.Ok, if_exec=True)
+            else:
+                PopUpMsg('Success', 'Download completed!', buttons=QMessageBox.Ok, if_exec=True)
+                self.close()
+        elif not path or not prompt or not melody or not duration or not filename:
+            PopUpMsg('Error', 'Please fill in all fields!', buttons=QMessageBox.Ok, if_exec=True)
+        elif not is_valid_filename(filename):
+            PopUpMsg('Error', 'Invalid filename!', buttons=QMessageBox.Ok, if_exec=True)
         else:
-            PopUpMsg('Success', 'Download completed!', buttons=QMessageBox.Ok, if_exec=True)
+            PopUpMsg('Error', 'Error', buttons=QMessageBox.Ok, if_exec=True)
 
-        self.close()
