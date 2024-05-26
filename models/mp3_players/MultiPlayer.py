@@ -1,6 +1,5 @@
 from pydub import AudioSegment
 
-from models.audio_edit.AudioFile import AudioFile
 from models.mp3_players.Player import Player
 from models.timers.Timer import Timer
 
@@ -11,36 +10,38 @@ class MultiPlayer:
     """
 
     players: dict[str, Player]  # Dict of Player objects
-    timer: Timer | None  # Timer object to manage the playback time
+    _timer: Timer | None  # Timer object to manage the playback time
 
     def __init__(self):
         self.players = {}
-        self.timer = None
+        self._timer = None
 
     def add_player(self, player_name: str, player: Player) -> None:
         """Adds a player to the player list."""
         self.players[player_name] = player
 
-    def play_all(self) -> None:
-        self.timer = Timer()
+    def play_all(self, volume: float) -> None:
+        self._timer = Timer()
         for _, player in self.players.items():
             player.play()
-        self.timer.start()
+
+        self.set_volume(volume)
+        self._timer.start()
 
     def pause_all(self) -> None:
         for _, player in self.players.items():
             player.pause()
-        self.timer.pause()
+        self._timer.pause()
 
     def resume_all(self) -> None:
         for _, player in self.players.items():
             player.resume()
-        self.timer.resume()
+        self._timer.resume()
 
     def stop_all(self) -> None:
         for _, player in self.players.items():
             player.stop()
-        self.timer.stop()
+        self._timer.stop()
 
     def export(self, file_path: str, format="mp3") -> None:
         """Combines all audio files from all players into one and exports them to a single file."""
@@ -56,7 +57,7 @@ class MultiPlayer:
         combined_audio.export(file_path, format=format)
 
     def get_time(self) -> tuple[int, int, int]:
-        hours, minutes, seconds = self.timer.get_time()
+        hours, minutes, seconds = self._timer.get_time()
         return round(hours), round(minutes), round(seconds)
 
     def get_max_length(self) -> float:
@@ -67,12 +68,17 @@ class MultiPlayer:
 
     @property
     def is_playing(self) -> bool:
-        for _, player in self.players.items():
-            if not player.is_playing:
-                return False
-        return True
+        return any([player.is_playing for _, player in self.players.items()])
 
     def set_time(self, time: float) -> None:
         for _, player in self.players.items():
             player.set_time(time)
-        self.timer.set_time(time)
+        self._timer.set_time(time)
+
+    def remove_player(self, player_name: str) -> None:
+        """Removes the selected player from the player list."""
+        self.players.pop(player_name)
+
+    def set_volume(self, volume: float) -> None:
+        for _, player in self.players.items():
+            player.set_volume(volume)

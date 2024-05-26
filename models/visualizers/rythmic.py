@@ -3,48 +3,40 @@ import librosa
 import librosa.display
 import numpy as np
 import matplotlib.pyplot as plt
+from .utils import convert_to_librosa_format
 
 
 class RhythmicAnalysis:
-    audio_segment: AudioSegment
-    y: np.ndarray
-    sr: int
+    _audio_segment: AudioSegment  # AudioSegment object
+    _y: np.ndarray  # Audio signal as numpy array
+    _sr: int  # Sample rate of the audio signal
 
     def __init__(self, audio_segment: AudioSegment):
-        self.audio_segment = audio_segment
-        self.y, self.sr = self._convert_to_librosa_format()
+        self._audio_segment = audio_segment
+        self._y, self._sr = convert_to_librosa_format(audio_segment.get_array_of_samples(), audio_segment.channels,
+                                                      audio_segment.frame_rate)
 
-    def _convert_to_librosa_format(self):
-        # Convert AudioSegment to numpy array
-        samples = np.array(self.audio_segment.get_array_of_samples())
-        if self.audio_segment.channels == 2:
-            samples = samples.reshape((-1, 2)).mean(axis=1)  # Convert stereo to mono
-        y = samples.astype(np.float32)
+    def analyze_tempogram(self, file_path: str) -> None:
+        """Computes and plots the tempogram of the audio signal"""
 
-        # Normalize to [-1, 1] range if needed
-        if np.issubdtype(samples.dtype, np.integer):
-            y /= np.iinfo(samples.dtype).max
-
-        sr = self.audio_segment.frame_rate
-        return y, sr
-
-    def analyze_tempogram(self, file_path: str):
-        onset_env = librosa.onset.onset_strength(y=self.y, sr=self.sr)
-        tempogram = librosa.feature.tempogram(onset_envelope=onset_env, sr=self.sr)
+        onset_env = librosa.onset.onset_strength(y=self._y, sr=self._sr)
+        tempogram = librosa.feature.tempogram(onset_envelope=onset_env, sr=self._sr)
 
         plt.figure(figsize=(10, 4))
-        librosa.display.specshow(tempogram, sr=self.sr, hop_length=512, x_axis='time', y_axis='tempo')
+        librosa.display.specshow(tempogram, sr=self._sr, hop_length=512, x_axis='time', y_axis='tempo')
         plt.title('Tempogram')
         plt.colorbar()
         plt.tight_layout()
         plt.savefig(file_path)
 
-    def analyze_beats(self, file_path: str):
-        onset_env = librosa.onset.onset_strength(y=self.y, sr=self.sr)
-        tempo, beats = librosa.beat.beat_track(onset_envelope=onset_env, sr=self.sr)
+    def analyze_beats(self, file_path: str) -> None:
+        """Detects beats in the audio signal and plots them on the onset strength curve"""
+
+        onset_env = librosa.onset.onset_strength(y=self._y, sr=self._sr)
+        tempo, beats = librosa.beat.beat_track(onset_envelope=onset_env, sr=self._sr)
 
         plt.figure(figsize=(10, 4))
-        times = librosa.frames_to_time(beats, sr=self.sr)
+        times = librosa.frames_to_time(beats, sr=self._sr)
         plt.plot(times, onset_env[beats], 'ro')
         plt.title('Beat Detection')
         plt.xlabel('Time (s)')

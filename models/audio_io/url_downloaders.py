@@ -4,17 +4,18 @@ from pytube import YouTube, request
 from pytube import exceptions as exp
 import re
 
+
 @dataclass
 class YouTubeDownloader:
     """
     Class to download audio from YouTube
     """
-    is_paused: bool = False
-    is_cancelled: bool = False
-    downloaded: int = 0
-    filesize: int = 0
+    _is_paused: bool = False # flag to check if download is paused
+    _is_cancelled: bool = False # flag to check if download is cancelled
+    downloaded: int = 0 # downloaded bytes
+    filesize: int = 0 # total file size
 
-    def download_audio(self, url, filelocation, filename):
+    def download_audio(self, url: str, filelocation: str, filename: str) -> None:
         """
         Download audio from YouTube to mp3
         """
@@ -24,17 +25,16 @@ class YouTubeDownloader:
             yt = YouTube(url)
             stream = yt.streams.filter(only_audio=True).first()
             self.filesize = stream.filesize
-            #filename = ''.join([i for i in re.findall('[\w +/.]', yt.title) if i.isalpha()])
             filepath = f'{filelocation}/{filename}.mp3'
             with open(filepath, 'wb') as f:
-                self.is_paused = self.is_cancelled = False
+                self._is_paused = self._is_cancelled = False
                 stream = request.stream(stream.url)
                 self.downloaded = 0
                 while True:
-                    if self.is_cancelled:
+                    if self._is_cancelled:
                         print('Download cancelled')
                         break
-                    if self.is_paused:
+                    if self._is_paused:
                         continue
                     chunk = next(stream, None)
                     if chunk:
@@ -55,7 +55,6 @@ class YouTubeDownloader:
         except IOError:
             raise IOError("Incorrect path.")
         except exp.RegexMatchError:
-            raise Exception("Invalid URL.")
+            raise ValueError("Invalid URL.")
         except Exception as e:
             raise Exception(f"An unexpected error occurred: {str(e)}")
-

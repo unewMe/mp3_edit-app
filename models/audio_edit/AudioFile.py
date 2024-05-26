@@ -50,7 +50,7 @@ class AudioFile(AudioSegment):
         Spawns a new AudioFile object with the given data and overrides.
         """
         return self.__class__(data, frame_rate=self.frame_rate, sample_width=self.sample_width,
-                              channels=self.channels, delay=self.delay, volume=self.volume, filters=self.filters, equalizer=self.equalizer, **overrides)
+                              channels=self.channels, delay=self.delay, volume=self.volume, filters=self.filters, equalizer=self.equalizer)
 
     def to_buffer(self, format: str = "mp3"):
         """
@@ -110,3 +110,9 @@ class AudioFile(AudioSegment):
         :return: AudioFile
         """
         return self.equalizer.change_band_gain(band, value)
+
+    def get_all_bands(self):
+        """
+        Returns all bands of the equalizer.
+        """
+        return self.equalizer.get_all_bands()

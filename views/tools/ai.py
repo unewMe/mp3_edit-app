@@ -80,7 +80,7 @@ class AiPopUp(QWidget):
 
         if path and prompt and melody and duration and filename:
             try:
-                self.leap.generate(prompt, melody, duration, path,filename)
+                self.leap.generate(prompt, melody, int(duration), path,filename)
             except ValueError as e:
                 PopUpMsg('Error', str(e), buttons=QMessageBox.Ok, if_exec=True)
             else:

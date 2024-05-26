@@ -5,6 +5,8 @@ from enum import Enum
 
 
 class Bands(Enum):
+    """Enum class for the frequency bands of the equalizer."""
+
     HZ_62 = (31, 62)
     HZ_125 = (62, 125)
     HZ_250 = (125, 250)
@@ -17,22 +19,33 @@ class Bands(Enum):
 
 
 class Equalizer:
+    """
+    Class for the equalizer of the audio file.
+    Segment is the instance of the AudioFile.
+    """
+    _fs: int  # Frame rate of the audio
+    _samples: np.ndarray  # Array of audio samples
+    _channels: int  # Number of audio channels
+    _sample_width: int  # Sample width of the audio
+    _gains: dict[Bands, float]  # Dictionary of gains for each frequency band
+
+
     def __init__(self, segment):
         self.segment = segment
-        self.fs = segment.frame_rate
-        self.samples = np.array(segment.get_array_of_samples(), dtype=np.float32)
-        self.channels = segment.channels
-        self.sample_width = segment.sample_width
-        self.gains = {band: 0.0 for band in Bands}
+        self._fs = segment.frame_rate
+        self._samples = np.array(segment.get_array_of_samples(), dtype=np.float32)
+        self._channels = segment.channels
+        self._sample_width = segment.sample_width
+        self._gains = {band: 0.0 for band in Bands}
 
     def change_band_gain(self, band: Bands, gain: float):
         from models.audio_edit.AudioFile import AudioFile
         freq_range = band.value
-        previous_gain = self.gains[band]
-        gain_change = gain - previous_gain
+        previous_gain = self._gains[band]
+        gain_change = gain                          #- previous_gain
 
-        samples = self.samples
-        sample_rate = self.fs
+        samples = self._samples
+        sample_rate = self._fs
 
         freqs = np.fft.rfftfreq(len(samples), d=1 / sample_rate)
         fft_samples = np.fft.rfft(samples)
@@ -46,11 +59,11 @@ class Equalizer:
         new_segment = self.segment._spawn(new_samples.tobytes())
 
         # Update the gain for the band
-        self.gains[band] = gain
+        self._gains[band] = gain
         self.segment = AudioFile.combine_with_audio_segment(self.segment, new_segment)
 
         return self.segment
 
     def get_all_bands(self):
-        return self.gains
+        return self._gains
 

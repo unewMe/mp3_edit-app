@@ -67,6 +67,7 @@ class HomeView(QMainWindow):
     equalizer_sliders: dict[Bands, QSlider]
     equalizer_lines: list[QFrame]
     equalizer_db_labels: list[QLabel]
+    equalizer_hz_labels: list[QLabel]
 
     def __init__(self, controller):
         super().__init__()
@@ -74,6 +75,7 @@ class HomeView(QMainWindow):
         self.equalizer_sliders = {}
         self.equalizer_lines = []
         self.equalizer_db_labels = []
+        self.equalizer_hz_labels = []
         self.initUI()
         self.showMaximized()
 
@@ -140,29 +142,31 @@ class HomeView(QMainWindow):
         # Geometry for audio editing frame
 
         self.audio_editing_frame.setGeometry(scale_rect(570, 60, 1311, 441))
+        self.editing_audio_label.setGeometry(scale_rect(20, 10, 250, 30))
         self.audio_filters_list.setGeometry(scale_rect(182, 90, 261, 261))
 
         # Geometry for audio editing frame - equalizer
 
-        self.equalizer_label.setGeometry(scale_rect(840, 90, 101, 21))
+        self.equalizer_label.setGeometry(scale_rect(840, 90, 101, 25))
 
         temp = 0
         for slider in self.equalizer_sliders.values():
-            slider.setGeometry(scale_rect(840 + temp, 140, 22, 160))
+            slider.setGeometry(scale_rect(840 + temp, 138, 22, 160))
             temp += 50
 
-        temp = 0
-        for line in self.equalizer_lines:
-            line.setGeometry(scale_rect(830, 149 + temp, 441, 16))
-            temp += 31
+        for i, line in enumerate(self.equalizer_lines):
+            line.setGeometry(scale_rect(830, 149 + i * 30, 441, 16))
 
-        temp = 0
-        for db in self.equalizer_db_labels:
-            db.setGeometry(scale_rect(775, 150 + temp, 49, 16))
-            temp += 30
+        for i, label in enumerate(self.equalizer_db_labels):
+            label.setGeometry(scale_rect(775, 150 + i * 30, 49, 16))
+
+        for i, label in enumerate(self.equalizer_hz_labels):
+            label.setGeometry(scale_rect(825 + i * 50, 300, 50, 16))
 
         # Geometry for audio editing frame - volume, delay
         self.audio_volume_label.setGeometry(scale_rect(60, 130, 49, 16))
+        self.audio_volume_min_label.setGeometry(scale_rect(-5, 162, 41, 16))
+        self.audio_volume_max_label.setGeometry(scale_rect(140, 162, 41, 16))
         self.audio_delay_label.setGeometry(scale_rect(60, 230, 41, 16))
         self.audio_volume_slider.setGeometry(scale_rect(30, 160, 111, 22))
         self.audio_delay_edit.setGeometry(scale_rect(60, 250, 41, 22))
@@ -188,6 +192,13 @@ class HomeView(QMainWindow):
         # Menu bar - File
 
         self.file_action_mb = self.menuBar().addMenu("File")
+
+        self.file_action_save = QAction("Save", self)
+        self.file_action_mb.addAction(self.file_action_save)
+
+        self.file_action_open_recent = QAction("Open Recent", self)
+        self.file_action_mb.addAction(self.file_action_open_recent)
+
         self.file_action_export = QAction("Export", self)
         self.file_action_mb.addAction(self.file_action_export)
 
@@ -368,6 +379,14 @@ class HomeView(QMainWindow):
         self.audio_volume_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.audio_volume_label.setText("Volume")
 
+        self.audio_volume_min_label = QLabel(self.audio_editing_frame)
+        self.audio_volume_min_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.audio_volume_min_label.setText("5%")
+
+        self.audio_volume_max_label = QLabel(self.audio_editing_frame)
+        self.audio_volume_max_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.audio_volume_max_label.setText("100%")
+
         self.audio_volume_slider = QSlider(self.audio_editing_frame)
         self.audio_volume_slider.setMaximum(60)
         self.audio_volume_slider.setMinimum(5)
@@ -409,6 +428,7 @@ class HomeView(QMainWindow):
 
         self.generate_plot_button = QPushButton(self.audio_editing_frame)
         self.generate_plot_button.setText("Generate")
+        self.generate_plot_button.setEnabled(False)
 
         self.plots_type_combobox = QComboBox(self.audio_editing_frame)
         self.plots_type_combobox.setEditable(False)
@@ -446,6 +466,12 @@ class HomeView(QMainWindow):
                 Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter)
             label.setText(i)
             self.equalizer_db_labels.append(label)
+
+        for i in self.equalizer_sliders:
+            label = QLabel(self.audio_editing_frame)
+            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            label.setText(f"{i.name}")
+            self.equalizer_hz_labels.append(label)
 
         # Raise blocking widgets
 
@@ -496,6 +522,8 @@ class HomeView(QMainWindow):
             self.play_button.setEnabled(True)
             self.stop_button.setEnabled(True)
 
+
+
     def update_audio_info(self, volume: int, delay: int, filters_in: list[str], filters_out: list[str],
                           plots: dict[str, list[str]], bands: dict[Bands, int]) -> None:
         """Updates audio info"""
@@ -511,6 +539,7 @@ class HomeView(QMainWindow):
             self.audio_filters_list.clear()
             self.audio_filters_list.addItems(filters_in)
             self.remove_all_filters_button.setEnabled(bool(filters_in))
+            self.add_filter_butoon.setEnabled(bool(filters_out))
 
             self.plots_type_combobox.clear()
             self.plots_type_combobox.addItems(list(plots.keys()))

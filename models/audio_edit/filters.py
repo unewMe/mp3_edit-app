@@ -1,25 +1,34 @@
-from enum import Enum
+from enum import Enum, StrEnum
 
-from pydub import AudioSegment
 import numpy as np
 from scipy.signal import butter, lfilter
 import abc
 
 
 class FilterType(Enum):
-    """
-    Enum class for the different types of filters.
-    """
-    LOW_PASS = lambda audio: LowPassFilter(audio, 5000, 5)
-    HIGH_PASS = lambda audio: HighPassFilter(audio, 200, 5)
-    ECHO = lambda audio: EchoFilter(audio, delay_ms=500, decay_factor=0.5)
-    REVERB = lambda audio: ReverbFilter(audio)
-    FLANGER = lambda audio: FlangerFilter(audio, delay_ms=5, speed=0.5)
+    LOW_PASS = "Low Pass"
+    HIGH_PASS = "High Pass"
+    ECHO = "Echo"
+    REVERB = "Reverb"
+    FLANGER = "Flanger"
+
+    def create_filter(self, audio):
+        if self == FilterType.LOW_PASS:
+            return LowPassFilter(audio, 5000, 5).apply()
+        elif self == FilterType.HIGH_PASS:
+            return HighPassFilter(audio, 200, 5).apply()
+        elif self == FilterType.ECHO:
+            return EchoFilter(audio, delay_ms=500, decay_factor=0.5).apply()
+        elif self == FilterType.REVERB:
+            return ReverbFilter(audio).apply()
+        elif self == FilterType.FLANGER:
+            return FlangerFilter(audio, delay_ms=5, speed=0.5).apply()
 
 
 class BaseFilter(metaclass=abc.ABCMeta):
     """
     Abstract base class for audio filters.
+    Audio is instance of AudioFile
     """
 
     samples: np.ndarray  # Array of audio samples
@@ -66,7 +75,7 @@ class LowPassFilter(BaseFilter):
 
         filtered_samples_bytes = self.cast_to_scaled_int16(filtered_samples).tobytes()
 
-        return AudioFile.from_segment(self.audio._spawn(filtered_samples_bytes))
+        return AudioFile.combine_with_audio_segment(self.audio, self.audio._spawn(filtered_samples_bytes))
 
 
 class HighPassFilter(BaseFilter):
@@ -90,7 +99,7 @@ class HighPassFilter(BaseFilter):
 
         filtered_samples_bytes = self.cast_to_scaled_int16(filtered_samples).tobytes()
 
-        return AudioFile.from_segment(self.audio._spawn(filtered_samples_bytes))
+        return AudioFile.combine_with_audio_segment(self.audio, self.audio._spawn(filtered_samples_bytes))
 
 
 class EchoFilter(BaseFilter):
@@ -115,7 +124,7 @@ class EchoFilter(BaseFilter):
 
         filtered_samples_bytes = self.cast_to_scaled_int16(echo_samples).tobytes()
 
-        return AudioFile.from_segment(self.audio._spawn(filtered_samples_bytes))
+        return AudioFile.combine_with_audio_segment(self.audio, self.audio._spawn(filtered_samples_bytes))
 
 
 class ReverbFilter(BaseFilter):
@@ -139,7 +148,7 @@ class ReverbFilter(BaseFilter):
 
         filtered_samples_bytes = self.cast_to_scaled_int16(reverb_samples).tobytes()
 
-        return AudioFile.from_segment(self.audio._spawn(filtered_samples_bytes))
+        return AudioFile.combine_with_audio_segment(self.audio, self.audio._spawn(filtered_samples_bytes))
 
 
 class FlangerFilter(BaseFilter):
@@ -165,4 +174,4 @@ class FlangerFilter(BaseFilter):
 
         filtered_samples_bytes = self.cast_to_scaled_int16(flanger_samples).tobytes()
 
-        return AudioFile.from_segment(self.audio._spawn(filtered_samples_bytes))
+        return AudioFile.combine_with_audio_segment(self.audio, self.audio._spawn(filtered_samples_bytes))

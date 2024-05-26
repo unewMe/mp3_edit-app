@@ -6,24 +6,24 @@ import time
 
 @dataclass
 class LeapMusicGenerator:
-    api_key: str | None = None
-    url: str = "https://api.tryleap.ai/api/v1/music"
-    headers: dict[str, str] = field(default_factory=lambda: {
+    _api_key: str | None = None  # API Key for the Leap Music API
+    _url: str = "https://api.tryleap.ai/api/v1/music"  # URL for the Leap Music API
+    _headers: dict[str, str] = field(default_factory=lambda: {
         "accept": "application/json",
         "content-type": "application/json"
-    })
+    })  # Headers for the API request
 
     def __post_init__(self):
-        self.headers['authorization'] = f"Bearer {self.api_key}"
+        self._headers['authorization'] = f"Bearer {self._api_key}"
 
-    def _generate_music(self, prompt, mode, duration):
+    def _generate_music(self, prompt: str, mode: str, duration: int) -> str | None:
         payload = {
             "prompt": prompt,
             "mode": mode,
             "duration": duration
         }
 
-        response = requests.post(self.url, json=payload, headers=self.headers)
+        response = requests.post(self._url, json=payload, headers=self._headers)
 
         if response.status_code == 200:
             job_id = response.json().get('id')
@@ -33,11 +33,11 @@ class LeapMusicGenerator:
             print("Error:", response.text)
             return None
 
-    def _get_audio_url(self, job_id):
-        get_url = f"{self.url}/{job_id}"
+    def _get_audio_url(self, job_id: str) -> str | None:
+        get_url = f"{self._url}/{job_id}"
 
         while True:
-            result_response = requests.get(get_url, headers=self.headers)
+            result_response = requests.get(get_url, headers=self._headers)
             result_data = result_response.json()
             if result_data['status'] == 'completed':
                 audio_url = result_data['audio_url']
@@ -50,13 +50,13 @@ class LeapMusicGenerator:
                 print("Still processing...")
                 time.sleep(5)
 
-    def _download_audio(self, audio_url, path, filename):
+    def _download_audio(self, audio_url: str, path: str, filename: str) -> None:
         audio_response = requests.get(audio_url)
         with open(f"{path}/{filename}", 'wb') as f:
             f.write(audio_response.content)
         print(f"Music saved as {filename}")
 
-    def generate(self, prompt, mode, duration, path, filename):
+    def generate(self, prompt: str, mode: str, duration: int, path: str, filename: str) -> None:
         job_id = self._generate_music(prompt, mode, duration)
         if job_id:
             audio_url = self._get_audio_url(job_id)
@@ -67,7 +67,6 @@ class LeapMusicGenerator:
         else:
             raise ValueError("Failed to generate music - Check the if your API Key is valid.")
 
-    def set_api_key(self, api_key):
-        self.api_key = api_key
-        self.headers['authorization'] = f"Bearer {self.api_key}"
-
+    def set_api_key(self, api_key: str) -> None:
+        self._api_key = api_key
+        self._headers['authorization'] = f"Bearer {self._api_key}"
