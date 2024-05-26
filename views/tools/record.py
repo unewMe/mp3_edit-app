@@ -1,10 +1,8 @@
-import sys
-
 from PySide6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QFileDialog, QMessageBox, QComboBox
 
 from models.audio_io.AudioRecorder import AudioRecorder
 from views.popups.PopUpMsg import PopUpMsg
-from .validate import is_valid_filename
+from .utils import is_valid_filename
 
 
 
