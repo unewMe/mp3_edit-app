@@ -1,5 +1,5 @@
 from PySide6.QtCore import QRect, Qt
-from PySide6.QtGui import QFont, QAction, QPixmap
+from PySide6.QtGui import QFont, QAction, QPixmap, QResizeEvent
 from PySide6.QtWidgets import (QComboBox, QFrame, QLabel, QLineEdit, QPushButton, QSlider, QTabWidget,
                                QWidget, QMainWindow, QListWidget, QAbstractItemView)
 
@@ -77,13 +77,15 @@ class HomeView(QMainWindow):
         self.initUI()
         self.showMaximized()
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        """Resizes widgets when window is resized"""
         screen_width = self.width()
         screen_height = self.height()
         self.update_geometry(screen_width, screen_height)
         super().resizeEvent(event)
 
-    def update_geometry(self, screen_width, screen_height):
+    def update_geometry(self, screen_width: int, screen_height: int):
+        """Updates geometry of widgets"""
         def scale_rect(x, y, width, height):
             return QRect(int(x * screen_width / 1920), int(y * screen_height / 1080), int(width * screen_width / 1920),
                          int(height * screen_height / 1080))
