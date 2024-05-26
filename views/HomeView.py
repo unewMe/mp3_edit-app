@@ -1,7 +1,7 @@
 from PySide6.QtCore import QRect, Qt
 from PySide6.QtGui import QFont, QAction, QPixmap, QResizeEvent
 from PySide6.QtWidgets import (QComboBox, QFrame, QLabel, QLineEdit, QPushButton, QSlider, QTabWidget,
-                               QWidget, QMainWindow, QListWidget, QAbstractItemView)
+                               QWidget, QMainWindow, QListWidget, QAbstractItemView, QMessageBox)
 
 from models.audio_edit.equalizer import Bands
 
@@ -78,6 +78,16 @@ class HomeView(QMainWindow):
         self.equalizer_hz_labels = []
         self.initUI()
         self.showMaximized()
+
+
+
+    def closeEvent(self, event) -> None:
+        """Closes the window"""
+        reply = QMessageBox.question(self, 'Message', "Are you sure to quit? Unsaved changes will be lost!", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
 
     def resizeEvent(self, event: QResizeEvent) -> None:
         """Resizes widgets when window is resized"""
