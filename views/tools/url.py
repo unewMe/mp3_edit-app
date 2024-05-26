@@ -1,8 +1,8 @@
-import sys
 from PySide6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QFileDialog, QMessageBox
 from models.audio_io.url_downloaders import YouTubeDownloader
 from views.popups.PopUpMsg import PopUpMsg
 
+from .utils import is_valid_filename
 
 class UrlPopUp(QWidget):
     def __init__(self):
@@ -18,6 +18,8 @@ class UrlPopUp(QWidget):
 
         self.path_label = QLabel('Path:', self)
         self.path_input = QLineEdit(self)
+        self.path_input.setReadOnly(True)
+
         self.setpath_button = QPushButton('Set Path', self)
         self.setpath_button.clicked.connect(self.set_path)
 
@@ -51,11 +53,18 @@ class UrlPopUp(QWidget):
         url = self.url_input.text()
         filename = self.filename_input.text()
         downloader = YouTubeDownloader()
-        try:
-            downloader.download_audio(url, path, filename)
-        except Exception as e:
-            PopUpMsg('Error', str(e), buttons=QMessageBox.Ok, if_exec=True)
-        else:
-            PopUpMsg('Success', 'Download completed!', buttons=QMessageBox.Ok, if_exec=True)
 
-        self.close()
+        if path and url and filename:
+            try:
+                downloader.download_audio(url, path, filename)
+            except Exception as e:
+                PopUpMsg('Error', str(e), buttons=QMessageBox.Ok, if_exec=True)
+            else:
+                PopUpMsg('Success', 'Download completed!', buttons=QMessageBox.Ok, if_exec=True)
+                self.close()
+        elif not path or not url or not filename:
+            PopUpMsg('Error', 'Please fill in all fields!', buttons=QMessageBox.Ok, if_exec=True)
+        elif not is_valid_filename(filename):
+            PopUpMsg('Error', 'Invalid filename!', buttons=QMessageBox.Ok, if_exec=True)
+        else:
+            PopUpMsg('Error', 'Error', buttons=QMessageBox.Ok, if_exec=True)
