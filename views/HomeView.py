@@ -224,6 +224,12 @@ class HomeView(QMainWindow):
         self.tools_action_recorder = QAction("Recorder", self)
         self.tools_action_mb.addAction(self.tools_action_recorder)
 
+        # Menu bar - Help
+
+        self.help_action_mb = self.menuBar().addMenu("Help")
+        self.help_action_about = QAction("About", self)
+        self.help_action_mb.addAction(self.help_action_about)
+
         # Tab view
 
         self.tab_view = QTabWidget(self)

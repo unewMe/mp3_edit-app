@@ -1,6 +1,7 @@
 import sys
 import os
 import pickle
+import webbrowser
 
 from PySide6 import QtCore
 from PySide6.QtCore import QTimer
@@ -44,6 +45,8 @@ class HomeController:
         self.view.tools_action_url.triggered.connect(self.url_download)
         self.view.tools_action_ai.triggered.connect(self.ai_download)
         self.view.tools_action_recorder.triggered.connect(self.recorder)
+
+        self.view.help_action_about.triggered.connect(lambda: webbrowser.open('https://github.com/unewMe/mp3_edit-app'))
 
         # Files widget
         self.view.add_file_button.clicked.connect(self.add_file)
