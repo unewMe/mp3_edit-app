@@ -11,6 +11,63 @@ _DB_LABELS = ["+12 dB", "+6 dB", "0 dB", "-6 dB", "-12 dB"]
 
 class HomeView(QMainWindow):
 
+    tab_view: QTabWidget
+    files: QWidget
+    read_files_label: QLabel
+    read_files_list: QListWidget
+    add_file_button: QPushButton
+    remove_files_button: QPushButton
+    players: QWidget
+    create_player_button: QPushButton
+    created_players_label: QLabel
+    remove_player_button: QPushButton
+    created_players_list: QListWidget
+    plots: QWidget
+    generated_plots_label: QLabel
+    remove_generated_plot_button: QPushButton
+    generated_plots_list: QListWidget
+    main_player_frame: QFrame
+    play_button: QPushButton
+    stop_button: QPushButton
+    multiplayer_slider: QSlider
+    main_volume_slider: QSlider
+    main_volume_label: QLabel
+    plot_display_frame: QFrame
+    plot_display_label: QLabel
+    playing_time_label: QLabel
+    max_time_label: QLabel
+    player_editing_frame: QFrame
+    editing_player_label: QLabel
+    audios_in_player_list: QListWidget
+    audios_in_player_label: QLabel
+    add_to_player_button: QPushButton
+    remove_from_player_button: QPushButton
+    queue_up_button: QPushButton
+    queue_down_button: QPushButton
+    queue_label: QLabel
+    choose_audio_label: QLabel
+    choose_player_label: QLabel
+    audio_editing_frame: QFrame
+    choose_audio_label: QLabel
+    editing_audio_label: QLabel
+    audio_volume_label: QLabel
+    audio_delay_label: QLabel
+    audio_volume_slider: QSlider
+    audio_delay_edit: QLineEdit
+    audio_filters_list: QListWidget
+    audio_filters_label: QLabel
+    filter_type_combobox: QComboBox
+    add_filter_butoon: QPushButton
+    remove_all_filters_button: QPushButton
+    audio_plots_label: QLabel
+    plots_type_list: QListWidget
+    generate_plot_button: QPushButton
+    plots_type_combobox: QComboBox
+    equalizer_label: QLabel
+    equalizer_sliders: dict[Bands, QSlider]
+    equalizer_lines: list[QFrame]
+    equalizer_db_labels: list[QLabel]
+
     def __init__(self, controller):
         super().__init__()
         self.controller = controller
@@ -129,7 +186,8 @@ class HomeView(QMainWindow):
         # Menu bar - File
 
         self.file_action_mb = self.menuBar().addMenu("File")
-        self.file_action_open = QAction("Export", self)
+        self.file_action_export = QAction("Export", self)
+        self.file_action_mb.addAction(self.file_action_export)
 
         # Menu bar - Tools
 
@@ -309,9 +367,9 @@ class HomeView(QMainWindow):
         self.audio_volume_label.setText("Volume")
 
         self.audio_volume_slider = QSlider(self.audio_editing_frame)
-        self.audio_volume_slider.setMaximum(80)
+        self.audio_volume_slider.setMaximum(60)
         self.audio_volume_slider.setMinimum(5)
-        self.audio_volume_slider.setValue(80)
+        self.audio_volume_slider.setValue(60)
         self.audio_volume_slider.setOrientation(Qt.Orientation.Horizontal)
 
         self.audio_delay_label = QLabel(self.audio_editing_frame)
@@ -390,6 +448,7 @@ class HomeView(QMainWindow):
         # Raise blocking widgets
 
         self.choose_audio_label.raise_()
+        self.choose_audio_label.hide()
         self.choose_player_label.raise_()
 
     def update_file_list(self, files) -> None:
@@ -405,8 +464,6 @@ class HomeView(QMainWindow):
             self.remove_player_button.setEnabled(False)
             self.play_button.setEnabled(False)
             self.stop_button.setEnabled(False)
-        else:
-            self.remove_player_button.setEnabled(True)
 
     def update_player_info(self) -> None:
         """Updates player info"""
@@ -414,11 +471,15 @@ class HomeView(QMainWindow):
             player_name = self.created_players_list.currentItem().text()
             self.editing_player_label.setText(f"Player: {player_name}")
             self.choose_player_label.hide()
+            self.choose_audio_label.show()
             self.update_player_audio_list(self.controller.core.players[player_name].sound_files.keys())
+            self.remove_player_button.setEnabled(True)
         else:
             self.editing_player_label.setText("Player: Not Selected")
+            self.choose_audio_label.hide()
             self.choose_player_label.show()
             self.audios_in_player_list.clear()
+            self.remove_player_button.setEnabled(False)
 
     def update_player_audio_list(self, audios: list[str]) -> None:
         """Updates player audio list"""
@@ -475,7 +536,7 @@ class HomeView(QMainWindow):
             self.queue_up_button.setEnabled(False)
             self.queue_down_button.setEnabled(False)
             self.audio_delay_edit.setText("")
-            self.audio_volume_slider.setValue(80)
+            self.audio_volume_slider.setValue(60)
             self.filter_type_combobox.clear()
             self.audio_filters_list.clear()
             self.plots_type_combobox.clear()
