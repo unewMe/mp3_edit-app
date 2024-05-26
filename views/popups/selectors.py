@@ -43,6 +43,7 @@ class PathSelectorPopUp(QDialog):
         self.setLayout(main_layout)
 
     def select_path(self):
+        """Select a directory and set the path to the line edit."""
         options = QFileDialog.Options()
         directory = QFileDialog.getExistingDirectory(self, "Select Directory", options=options)
 
@@ -100,11 +101,13 @@ class PathSelectorWithTypeAndFileName(QDialog):
         self.setLayout(layout)
 
     def file_name_given(self):
+        """Check if the file name is given and enable the continue button."""
         if self.file_name_edit.text():
             self.continue_button.setEnabled(True)
         else:
             self.continue_button.setEnabled(False)
     def continue_apk(self):
+        """Get the file name and type and close the dialog."""
         self.file_name = self.file_name_edit.text()
         self.file_type = self.file_type_combobox.currentText()
 

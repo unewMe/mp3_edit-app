@@ -51,11 +51,13 @@ class RecordPopUp(QWidget):
         self.setLayout(layout)
 
     def set_path(self):
+        """Set the path for the recorded file."""
         path = QFileDialog.getExistingDirectory(self, 'Choose Directory')
         if path:
             self.path_input.setText(path)
 
     def show(self):
+        """Show the popup."""
         super().show()
         self.recorder.reset()
         self.start_button.setEnabled(True)
@@ -64,6 +66,7 @@ class RecordPopUp(QWidget):
         self.filename_input.setReadOnly(False)
 
     def start(self):
+        """Start recording the audio."""
         if is_valid_filename(self.filename_input.text()) and self.path_input.text():
             self.filename_input.setReadOnly(True)
             self.start_button.setEnabled(False)
@@ -77,6 +80,7 @@ class RecordPopUp(QWidget):
 
 
     def stop(self):
+        """Stop recording the audio and save it."""
         path = self.path_input.text()
         filename = self.filename_input.text()
         type = self.file_type_combobox.currentText()

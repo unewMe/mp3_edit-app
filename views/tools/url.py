@@ -44,11 +44,13 @@ class UrlPopUp(QWidget):
         self.setLayout(layout)
 
     def set_path(self):
+        """Set the path for the downloaded file."""
         path = QFileDialog.getExistingDirectory(self, 'Choose Directory')
         if path:
             self.path_input.setText(path)
 
     def download(self):
+        """Download the audio from the provided URL."""
         path = self.path_input.text()
         url = self.url_input.text()
         filename = self.filename_input.text()

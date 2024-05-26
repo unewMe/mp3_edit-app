@@ -63,12 +63,14 @@ class AiPopUp(QWidget):
         self.setLayout(layout)
 
     def set_path(self):
+        """Set the path for the generated file."""
         path = QFileDialog.getExistingDirectory(self, 'Choose Directory')
         if path:
             self.path_input.setText(path)
 
 
     def generate(self):
+        """Generate the audio file."""
         path = self.path_input.text()
         prompt = self.prompt_input.text()
         melody = self.melody_input.text()
