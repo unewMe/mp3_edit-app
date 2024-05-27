@@ -13,16 +13,17 @@ class FilterType(Enum):
     FLANGER = "Flanger"
 
     def create_filter(self, audio):
-        if self == FilterType.LOW_PASS:
-            return LowPassFilter(audio, 5000, 5).apply()
-        elif self == FilterType.HIGH_PASS:
-            return HighPassFilter(audio, 200, 5).apply()
-        elif self == FilterType.ECHO:
-            return EchoFilter(audio, delay_ms=500, decay_factor=0.5).apply()
-        elif self == FilterType.REVERB:
-            return ReverbFilter(audio).apply()
-        elif self == FilterType.FLANGER:
-            return FlangerFilter(audio, delay_ms=5, speed=0.5).apply()
+        match self:
+            case FilterType.LOW_PASS:
+                return LowPassFilter(audio, 5000, 5).apply()
+            case FilterType.HIGH_PASS:
+                return HighPassFilter(audio, 200, 5).apply()
+            case FilterType.ECHO:
+                return EchoFilter(audio, delay_ms=500, decay_factor=0.5).apply()
+            case FilterType.REVERB:
+                return ReverbFilter(audio).apply()
+            case FilterType.FLANGER:
+                return FlangerFilter(audio, delay_ms=5, speed=0.5).apply()
 
 
 class BaseFilter(metaclass=abc.ABCMeta):
