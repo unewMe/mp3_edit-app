@@ -201,8 +201,8 @@ class AudioQueuePlayer(Player):
 
     def __getstate__(self):
         state = self.__dict__.copy()
-        del state['channel']
-        del state['sound']
+        del state['_channel']
+        del state['_sound']
         return state
 
     def __setstate__(self, state):

@@ -383,6 +383,7 @@ class HomeController:
         """Sets the band of the equalizer in the selected audio."""
 
         if self.view.audios_in_player_list.selectedItems():
+            self.view.audio_volume_slider.setValue(60)
             selected_audio = self.view.audios_in_player_list.currentItem().text()
             player_name = self.view.created_players_list.currentItem().text()
             value = self.view.equalizer_sliders[band].value()

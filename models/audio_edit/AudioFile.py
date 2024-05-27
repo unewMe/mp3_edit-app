@@ -102,7 +102,10 @@ class AudioFile(AudioSegment):
         :return: AudioFile
         """
         self.filters.append(filter_type)
-        return filter_type.create_filter(self)
+        new_audio = filter_type.create_filter(self)
+        new_audio.equalizer.segment = new_audio
+        new_audio.equalizer._samples = new_audio.get_array_of_samples()
+        return new_audio
 
     def set_value_on_band(self, band, value: float):
         """
