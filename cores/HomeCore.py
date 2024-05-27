@@ -57,8 +57,10 @@ class HomeCore:
 
     def add_file_to_player(self, file_name: str, player_name: str) -> bool:
         """Adds the selected file to the selected player."""
-        self.players[player_name].load(file_name, AudioFile.from_segment(self.files[file_name]))
-        return True
+        if player_name in self.players and file_name in self.files:
+            self.players[player_name].load(file_name, AudioFile.from_segment(self.files[file_name]))
+            return True
+        return False
 
     def combine_audio_files(self) -> None:
         """Combines all audio files from the selected player."""
@@ -112,13 +114,15 @@ class HomeCore:
 
     def get_volume_on_sound_in_player(self, player_name: str, selected_audio: str) -> float:
         """Returns the volume of the selected audio in the selected player."""
-
-        return self.players[player_name].get_audio_volume(selected_audio)
+        if player_name in self.players:
+            return self.players[player_name].get_audio_volume(selected_audio)
+        return 0.0
 
     def get_audio_delay_in_player(self, player_name: str, selected_audio: str) -> int:
         """Returns the delay of the selected audio in the selected player."""
-
-        return self.players[player_name].get_audio_delay(selected_audio)
+        if player_name in self.players:
+            return self.players[player_name].get_audio_delay(selected_audio)
+        return 0
 
     def set_volume_on_sound(self, player_name: str, selected_audio: str, volume: float) -> None:
         """Sets the volume of the selected audio in the selected player."""
@@ -132,8 +136,9 @@ class HomeCore:
 
     def get_filters_from_sound(self, player_name: str, selected_audio: str) -> list[str]:
         """Returns the filters applied to the selected audio in the selected player."""
-
-        return [filter.value for filter in self.players[player_name].get_filters_from_sound(selected_audio)]
+        if player_name in self.players:
+            return [filter.value for filter in self.players[player_name].get_filters_from_sound(selected_audio)]
+        return []
 
     def get_rest_of_filters(self, filters: list[str]) -> list[str]:
         """Returns the filters that are not applied to the selected audio."""
@@ -204,8 +209,8 @@ class HomeCore:
 
     def all_bands_value_from_audio(self, player_id: str, audio_id: str) -> dict[Bands, float]:
         """Returns the value of all bands from the selected audio in the selected player."""
-
-        return self.players[player_id].get_all_bands_from_audio(audio_id)
+        if player_id in self.players:
+            return self.players[player_id].get_all_bands_from_audio(audio_id)
 
     def set_band_on_audio(self, player: str, audio: str, band: Bands, value: float) -> None:
         """Sets the value of the selected band on the selected audio in the selected player."""

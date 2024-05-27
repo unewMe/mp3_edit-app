@@ -547,9 +547,6 @@ class HomeView(QMainWindow):
             audio_name = self.audios_in_player_list.currentItem().text()
             self.editing_audio_label.setText(f"Editing: {audio_name}")
 
-            self.audio_delay_edit.setText(str(delay))
-            self.audio_volume_slider.setValue(volume)
-
             self.filter_type_combobox.clear()
             self.filter_type_combobox.addItems(filters_out)
             self.audio_filters_list.clear()
@@ -563,6 +560,9 @@ class HomeView(QMainWindow):
 
             for band, value in bands.items():
                 self.equalizer_sliders[band].setValue(value)
+
+            self.audio_delay_edit.setText(str(delay))
+            self.audio_volume_slider.setValue(volume)
 
             row = self.audios_in_player_list.row(self.audios_in_player_list.currentItem())
 

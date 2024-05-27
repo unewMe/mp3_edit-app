@@ -97,7 +97,7 @@ class HomeController:
         self.view.queue_up_button.clicked.connect(self.queue_up)
         self.view.queue_down_button.clicked.connect(self.queue_down)
 
-        self.view.audio_volume_slider.valueChanged.connect(self.set_audio_volume)
+        self.view.audio_volume_slider.sliderReleased.connect(self.set_audio_volume)
         self.view.audio_delay_edit.editingFinished.connect(self.set_audio_delay)
 
         self.view.add_filter_butoon.clicked.connect(self.add_filter_on_audio)
@@ -149,6 +149,9 @@ class HomeController:
         player_name = self.view.created_players_list.currentItem().text()
         self.core.remove_player(player_name)
         self.view.update_player_list(self.core.players)
+        bands = self.core.get_bands()
+        bands_value_reset = {band: 0 for band in bands}
+        self.view.update_audio_info(delay=0, volume=60, filters_in=[], filters_out=[],bands=bands_value_reset,plots={})
 
     def add_file_to_player(self) -> None:
         """Adds the selected file to the selected player."""
@@ -293,7 +296,7 @@ class HomeController:
                                         plots=plots_type_with_values,
                                         bands=self.core.all_bands_value_from_audio(player_name, selected_audio))
         else:
-            self.view.update_audio_info(delay=0, volume=100, filters_in=[], filters_out=[],
+            self.view.update_audio_info(delay=0, volume=60, filters_in=[], filters_out=[],
                                         plots=plots_type_with_values, bands={})
 
     def set_audio_volume(self) -> None:
