@@ -366,7 +366,7 @@ class HomeController:
         path_selector = PathSelectorPopUp()
         path_selector.exec_()
         path = path_selector.directory
-        if os.path.isdir(path):
+        if path and os.path.isdir(path):
             self.core.generate_plot(player_name, selected_audio, path, type, plots)
             PopUpMsg("Success", "Plot generated successfully.", buttons=QMessageBox.Ok, if_exec=True)
             self.view.update_plots(self.core.plots)
