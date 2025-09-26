@@ -1,0 +1,12 @@
+PySide6
+numpy
+matplotlib
+pydub
+librosa
+scipy
+pygame
+pytube
+pillow
+pyaudio
+requests
+
